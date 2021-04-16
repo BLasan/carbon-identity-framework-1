@@ -34,5 +34,6 @@ public interface ProvisioningHandler {
      * @throws FrameworkException
      */
     public void handle(List<String> roles, String subject, Map<String, String> attributes,
-                       String provisioningUserStoreId, String tenantDomain) throws FrameworkException;
+            String provisioningUserStoreId, String tenantDomain, List<String> idpToLocalRoleMapping)
+            throws FrameworkException;
 }

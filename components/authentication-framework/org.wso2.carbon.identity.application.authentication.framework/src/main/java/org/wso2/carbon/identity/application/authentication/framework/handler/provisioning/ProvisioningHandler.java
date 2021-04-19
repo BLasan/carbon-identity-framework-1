@@ -37,7 +37,7 @@ public interface ProvisioningHandler {
             String provisioningUserStoreId, String tenantDomain) throws FrameworkException;
 
     /**
-     * Default implementation for handle in provisioning.
+     * Default implementation to validate idp role mappings by keeping backward compatibility.
      *
      * @param roles
      * @param subject
@@ -50,6 +50,6 @@ public interface ProvisioningHandler {
     default void handle(List<String> roles, String subject, Map<String, String> attributes,
             String provisioningUserStoreId, String tenantDomain, List<String> idpToLocalRoleMapping)
             throws FrameworkException {
-        throw new FrameworkException("Operation is not supported");
+        throw new FrameworkException("Operation is not supported.");
     }
 }

@@ -232,18 +232,23 @@ public class DefaultProvisioningHandler implements ProvisioningHandler {
                 List<String> currentRolesList = Arrays.asList(userStoreManager.getRoleListOfUser(username));
                 Collection<String> deletingRoles = retrieveRolesToBeDeleted(realm, currentRolesList, rolesToAdd);
 
-                if (idpToLocalRoleMapping != null) {
+                if (idpToLocalRoleMapping != null && !idpToLocalRoleMapping.isEmpty()) {
                     boolean excludeUnmappedRoles = true;
+                    boolean includeManuallyAddedLocalRoles = false;
                     if (StringUtils.isNotEmpty(IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP))) {
                         excludeUnmappedRoles = Boolean
                                 .parseBoolean(IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP));
                     }
-                    boolean includeManuallyAddedLocalRoles =
-                            StringUtils.isNotEmpty(IdentityUtil.getProperty(SEND_MANUALLY_ADDED_LOCAL_ROLES_OF_IDP))
-                                    && Boolean
-                                    .parseBoolean(IdentityUtil.getProperty(SEND_MANUALLY_ADDED_LOCAL_ROLES_OF_IDP));
 
-                    // Get the intersection of current deletingList with idp role mappings.
+                    if (StringUtils.isNotEmpty(IdentityUtil.getProperty(SEND_MANUALLY_ADDED_LOCAL_ROLES_OF_IDP))) {
+                        includeManuallyAddedLocalRoles = Boolean
+                                .parseBoolean(IdentityUtil.getProperty(SEND_MANUALLY_ADDED_LOCAL_ROLES_OF_IDP));
+                    }
+
+
+                    /* Get the intersection of current deletingList with idpRoleMappings,deletingRoles will be equal to
+                    mapped idp roles.Here we assume only the mapped idp roles with federated idp.
+                    */
                     if (excludeUnmappedRoles && includeManuallyAddedLocalRoles) {
                         deletingRoles = deletingRoles.stream().distinct().filter(idpToLocalRoleMapping::contains)
                                 .collect(Collectors.toSet());

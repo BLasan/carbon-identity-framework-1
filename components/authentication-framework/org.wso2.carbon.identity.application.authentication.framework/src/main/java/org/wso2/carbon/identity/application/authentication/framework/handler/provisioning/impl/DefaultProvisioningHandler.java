@@ -93,6 +93,14 @@ public class DefaultProvisioningHandler implements ProvisioningHandler {
 
     @Override
     public void handle(List<String> roles, String subject, Map<String, String> attributes,
+            String provisioningUserStoreId, String tenantDomain) throws FrameworkException {
+
+        handle(roles, subject, attributes, provisioningUserStoreId, tenantDomain, null);
+
+    }
+
+    @Override
+    public void handle(List<String> roles, String subject, Map<String, String> attributes,
             String provisioningUserStoreId, String tenantDomain, List<String> idpToLocalRoleMapping)
             throws FrameworkException {
 
@@ -224,20 +232,22 @@ public class DefaultProvisioningHandler implements ProvisioningHandler {
                 List<String> currentRolesList = Arrays.asList(userStoreManager.getRoleListOfUser(username));
                 Collection<String> deletingRoles = retrieveRolesToBeDeleted(realm, currentRolesList, rolesToAdd);
 
-                boolean excludeUnmappedRoles = true;
-                if (StringUtils.isNotEmpty(IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP))) {
-                    excludeUnmappedRoles = Boolean
-                            .parseBoolean(IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP));
-                }
-                boolean includeManuallyAddedLocalRoles =
-                        StringUtils.isNotEmpty(IdentityUtil.getProperty(SEND_MANUALLY_ADDED_LOCAL_ROLES_OF_IDP))
-                                && Boolean
-                                .parseBoolean(IdentityUtil.getProperty(SEND_MANUALLY_ADDED_LOCAL_ROLES_OF_IDP));
+                if (idpToLocalRoleMapping != null) {
+                    boolean excludeUnmappedRoles = true;
+                    if (StringUtils.isNotEmpty(IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP))) {
+                        excludeUnmappedRoles = Boolean
+                                .parseBoolean(IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP));
+                    }
+                    boolean includeManuallyAddedLocalRoles =
+                            StringUtils.isNotEmpty(IdentityUtil.getProperty(SEND_MANUALLY_ADDED_LOCAL_ROLES_OF_IDP))
+                                    && Boolean
+                                    .parseBoolean(IdentityUtil.getProperty(SEND_MANUALLY_ADDED_LOCAL_ROLES_OF_IDP));
 
-                // Get the intersection of current deletingList with idp role mappings.
-                if (excludeUnmappedRoles && includeManuallyAddedLocalRoles) {
-                    deletingRoles = deletingRoles.stream().distinct().filter(idpToLocalRoleMapping::contains)
-                            .collect(Collectors.toSet());
+                    // Get the intersection of current deletingList with idp role mappings.
+                    if (excludeUnmappedRoles && includeManuallyAddedLocalRoles) {
+                        deletingRoles = deletingRoles.stream().distinct().filter(idpToLocalRoleMapping::contains)
+                                .collect(Collectors.toSet());
+                    }
                 }
 
                 rolesToAdd.removeAll(currentRolesList);

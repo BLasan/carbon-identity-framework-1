@@ -34,6 +34,22 @@ public interface ProvisioningHandler {
      * @throws FrameworkException
      */
     public void handle(List<String> roles, String subject, Map<String, String> attributes,
+            String provisioningUserStoreId, String tenantDomain) throws FrameworkException;
+
+    /**
+     * Default implementation for handle in provisioning.
+     *
+     * @param roles
+     * @param subject
+     * @param attributes
+     * @param provisioningUserStoreId
+     * @param tenantDomain
+     * @param idpToLocalRoleMapping
+     * @throws FrameworkException
+     */
+    default void handle(List<String> roles, String subject, Map<String, String> attributes,
             String provisioningUserStoreId, String tenantDomain, List<String> idpToLocalRoleMapping)
-            throws FrameworkException;
+            throws FrameworkException {
+        throw new FrameworkException("Operation is not supported");
+    }
 }

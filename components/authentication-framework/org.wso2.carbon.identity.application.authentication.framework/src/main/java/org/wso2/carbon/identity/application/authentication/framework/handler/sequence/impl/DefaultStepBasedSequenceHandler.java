@@ -48,7 +48,6 @@ import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -515,12 +514,8 @@ public class DefaultStepBasedSequenceHandler implements StepBasedSequenceHandler
                 extAttributesValueMap.putAll(localUnfilteredClaimsForNullValues);
             }
 
-            List<String> idpToLocalRoleMapping = new ArrayList<String>(
-                    context.getExternalIdP().getRoleMappings().values());
-
-            FrameworkUtils.getProvisioningHandler()
-                    .handle(mappedRoles, subjectIdentifier, extAttributesValueMap, userStoreDomain,
-                            context.getTenantDomain(), idpToLocalRoleMapping);
+            FrameworkUtils.getProvisioningHandler().handle(mappedRoles, subjectIdentifier,
+                    extAttributesValueMap, userStoreDomain, context.getTenantDomain());
 
         } catch (FrameworkException e) {
             log.error("User provisioning failed!", e);

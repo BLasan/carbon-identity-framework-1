@@ -55,17 +55,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants.Config.SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP;
-import static org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants.Config.SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP_EXCLUDING_UNMAPPED;
-
 public class DefaultStepBasedSequenceHandler implements StepBasedSequenceHandler {
 
     private static final Log log = LogFactory.getLog(DefaultStepBasedSequenceHandler.class);
     private static volatile DefaultStepBasedSequenceHandler instance;
-
-    private static boolean configsPopulated = false;
+    private static final String SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP = "FederatedRoleManagement"
+            + ".ReturnOnlyMappedLocalRoles";
     private static boolean returnOnlyMappedLocalRoles = false;
-    private static boolean returnOnlyMappedLocalRolesUnmappedExclusive = false;
 
     public static DefaultStepBasedSequenceHandler getInstance() {
 
@@ -78,6 +74,13 @@ public class DefaultStepBasedSequenceHandler implements StepBasedSequenceHandler
         }
 
         return instance;
+    }
+
+    static {
+        if (IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP) != null) {
+            returnOnlyMappedLocalRoles = Boolean
+                    .parseBoolean(IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP));
+        }
     }
 
     /**
@@ -285,8 +288,6 @@ public class DefaultStepBasedSequenceHandler implements StepBasedSequenceHandler
 
                 if (stepConfig.isSubjectAttributeStep()) {
 
-                    populateConfigs();
-
                     subjectAttributesFoundInStep = true;
 
                     String idpRoleClaimUri = getIdpRoleClaimUri(stepConfig, context);
@@ -300,10 +301,6 @@ public class DefaultStepBasedSequenceHandler implements StepBasedSequenceHandler
                             identityProviderMappedUserRolesUnmappedInclusive);
                     if (StringUtils.isNotBlank(idpRoleClaimUri)
                             && StringUtils.isNotBlank(serviceProviderMappedUserRoles)) {
-                        extAttibutesValueMap.put(idpRoleClaimUri, serviceProviderMappedUserRoles);
-                    }
-
-                    if (returnOnlyMappedLocalRolesUnmappedExclusive && !externalIdPConfig.getRoleMappings().isEmpty()) {
                         extAttibutesValueMap.put(idpRoleClaimUri, serviceProviderMappedUserRoles);
                     }
 
@@ -323,14 +320,7 @@ public class DefaultStepBasedSequenceHandler implements StepBasedSequenceHandler
 
                 if (stepConfig.isSubjectIdentifierStep()) {
                     subjectFoundInStep = true;
-                    AuthenticatedUser authenticatedUser = new AuthenticatedUser(stepConfig.getAuthenticatedUser());
-                    if (returnOnlyMappedLocalRoles && returnOnlyMappedLocalRolesUnmappedExclusive &&
-                            MapUtils.isEmpty(mappedAttrs)) {
-                        // Since there are no matching idp role mappings and no other claim mappings available for this
-                        // user, the user attributes are set to null.
-                        authenticatedUser.setUserAttributes(null);
-                    }
-                    sequenceConfig.setAuthenticatedUser(authenticatedUser);
+                    sequenceConfig.setAuthenticatedUser(new AuthenticatedUser(stepConfig.getAuthenticatedUser()));
                 }
                 if (stepConfig.isSubjectAttributeStep()) {
 
@@ -384,20 +374,6 @@ public class DefaultStepBasedSequenceHandler implements StepBasedSequenceHandler
         }
         if (!authenticatedUserAttributes.isEmpty() &&  sequenceConfig.getAuthenticatedUser() != null) {
             sequenceConfig.getAuthenticatedUser().setUserAttributes(authenticatedUserAttributes);
-        }
-    }
-
-    /**
-     * Read identity.xml configs.
-     */
-    private void populateConfigs() {
-
-        if (!configsPopulated) {
-            returnOnlyMappedLocalRoles = Boolean.parseBoolean(
-                    IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP));
-            returnOnlyMappedLocalRolesUnmappedExclusive = Boolean.parseBoolean(
-                    IdentityUtil.getProperty(SEND_ONLY_LOCALLY_MAPPED_ROLES_OF_IDP_EXCLUDING_UNMAPPED));
-            configsPopulated = true;
         }
     }
 
@@ -577,4 +553,5 @@ public class DefaultStepBasedSequenceHandler implements StepBasedSequenceHandler
             FrameworkException {
         return FrameworkUtils.getLocalClaimUriMappedForIdPRoleClaim(externalIdPConfig);
     }
+
 }

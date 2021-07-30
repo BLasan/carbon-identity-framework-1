@@ -3744,6 +3744,44 @@ public class IdPManagementDAO {
             prepStmt = conn.prepareStatement(sqlStmt);
             prepStmt.setInt(1, idPId);
             prepStmt.executeUpdate();
+
+            ////////////////////////////////////
+            PreparedStatement prepStmt2 = null;
+            ResultSet rs1 = null;
+            try {
+                String sqlStmt2 = IdPManagementConstants.SQLQueries.GET_IDP_PROVISIONING_CONFIGS_ID;
+                prepStmt2 = conn.prepareStatement(sqlStmt2);
+                prepStmt2.setInt(1, idPId);
+                rs1 = prepStmt2.executeQuery();
+                while (rs1.next()) {
+                    int id = rs1.getInt("ID");
+                    deleteIdpProvConfigProperty(conn,id);
+                }
+
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+            ///////////////////////////////////
+        } finally {
+            IdentityDatabaseUtil.closeStatement(prepStmt);
+        }
+    }
+
+
+    /**
+     * @param conn
+     * @param provisioningConfigId
+     * @throws SQLException
+     */
+    private void deleteIdpProvConfigProperty(Connection conn, int provisioningConfigId) throws SQLException {
+        PreparedStatement prepStmt = null;
+        String sqlStmt = IdPManagementConstants.SQLQueries.DELETE_IDP_PROV_CONFIG_PROPERTY;
+
+        try {
+            prepStmt = conn.prepareStatement(sqlStmt);
+            prepStmt.setInt(1, provisioningConfigId);
+            prepStmt.executeUpdate();
         } finally {
             IdentityDatabaseUtil.closeStatement(prepStmt);
         }

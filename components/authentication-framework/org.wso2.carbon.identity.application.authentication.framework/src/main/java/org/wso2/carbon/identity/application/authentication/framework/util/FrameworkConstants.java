@@ -140,6 +140,9 @@ public abstract class FrameworkConstants {
     // Current session thread local identifier.
     public static final String CURRENT_SESSION_IDENTIFIER = "currentSessionIdentifier";
 
+    // Maximum retry times for session data store.
+    public static final int MAX_RETRY_TIME = 3;
+
     // DB product names.
     public static final String MY_SQL = "MySQL";
     public static final String MARIA_DB = "MariaDB";

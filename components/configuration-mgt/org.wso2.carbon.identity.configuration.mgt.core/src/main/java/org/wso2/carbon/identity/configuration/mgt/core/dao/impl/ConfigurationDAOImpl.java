@@ -534,7 +534,6 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                                 }
                         )
                 );
-                log.info("engine: " + engine);
                 if (engine.equals("ndbcluster") || engine.equals("NDB") ) {
                     String resourceId = getResourceId(tenantId, resourceTypeId, resourceName);
                     deleteFiles(resourceId);

@@ -78,6 +78,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
         .DB_SCHEMA_COLUMN_NAME_HAS_ATTRIBUTE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
         .DB_SCHEMA_COLUMN_NAME_HAS_FILE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ENGINE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.DB_SCHEMA_COLUMN_NAME_ID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
         .DB_SCHEMA_COLUMN_NAME_LAST_MODIFIED;
@@ -95,6 +96,10 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
         .DB_SCHEMA_COLUMN_NAME_TENANT_ID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
         .DB_SCHEMA_COLUMN_NAME_VALUE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
+        .IDN_CONFIG_TYPE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
+        .IDN_CONFIG_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
         .ERROR_CODE_ADD_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
@@ -146,6 +151,8 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
         .ERROR_CODE_CHECK_DB_METADATA;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_ATTRIBUTE_SQL;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_ENGINE_TYPE_OF_TABLE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_DATABASE_NAME;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_FILES_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_FILE_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_RESOURCE_ATTRIBUTES_SQL;
@@ -160,6 +167,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConsta
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants
         .GET_RESOURCE_BY_ID_MYSQL_WITHOUT_CREATED_TIME;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_RESOURCE_BY_NAME_MYSQL;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_RESOURCE_ID_TENANT_ID_BY_TYPE_ID_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants
         .GET_RESOURCE_BY_NAME_MSSQL_OR_ORACLE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants
@@ -477,6 +485,30 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     }
 
     /**
+     * Get resourceId for the {@link Resource}.
+     *
+     * @param tenantId tenant Id of the {@link Resource}.
+     * @param resourceTypeId type Id of the {@link Resource}.
+     * @param resourceName name of the {@link Resource}.
+     * @return resourceId for the given resource.
+     */
+    private String getResourceId(int tenantId, String resourceTypeId, String resourceName) throws TransactionException {
+        JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        return jdbcTemplate.withTransaction(template ->
+                template.fetchSingleRecord(
+                        GET_RESOURCE_ID_BY_NAME_SQL,
+                        (resultSet, rowNumber) -> resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID),
+                        preparedStatement -> {
+                            int initialParameterIndex = 1;
+                            preparedStatement.setString(initialParameterIndex, resourceName);
+                            preparedStatement.setInt(++initialParameterIndex,tenantId);
+                            preparedStatement.setString(++initialParameterIndex, resourceTypeId);
+                        }
+                )
+        );
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -484,14 +516,37 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        JdbcTemplate jdbcTemplate1 = JdbcUtils.getNewTemplate();
         try {
+            String DBname = jdbcTemplate1.withTransaction(template ->
+                    template.fetchSingleRecord(GET_DATABASE_NAME,
+                            (resultSet, rowNumber) -> resultSet.getString(1),
+                            preparedStatement -> {}));
+
+            if (isMySQLDB()) {
+                JdbcTemplate jdbcTemplate2 = JdbcUtils.getNewTemplate();
+                String engine = jdbcTemplate2.withTransaction(template ->
+                        template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
+                                (resultSet, rowNumber) -> resultSet.getString(ENGINE),
+                                preparedStatement -> {
+                                    preparedStatement.setString(1, DBname);
+                                    preparedStatement.setString(2, IDN_CONFIG_RESOURCE);
+                                }
+                        )
+                );
+                log.info("engine: " + engine);
+                if (engine.equals("ndbcluster") || engine.equals("NDB") ) {
+                    String resourceId = getResourceId(tenantId, resourceTypeId, resourceName);
+                    deleteFiles(resourceId);
+                }
+            }
             jdbcTemplate.executeUpdate(SQLConstants.DELETE_RESOURCE_SQL, preparedStatement -> {
                 int initialParameterIndex = 1;
                 preparedStatement.setString(initialParameterIndex, resourceName);
                 preparedStatement.setInt(++initialParameterIndex, tenantId);
                 preparedStatement.setString(++initialParameterIndex, resourceTypeId);
             });
-        } catch (DataAccessException e) {
+        } catch (DataAccessException | TransactionException e) {
             throw handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceName, e);
         }
     }
@@ -503,13 +558,34 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     public void deleteResourceById(int tenantId, String resourceId) throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
+        JdbcTemplate jdbcTemplate1 = JdbcUtils.getNewTemplate();
         try {
+            String DBname = jdbcTemplate1.withTransaction(template ->
+                    template.fetchSingleRecord(GET_DATABASE_NAME,
+                            (resultSet, rowNumber) -> resultSet.getString(1),
+                            preparedStatement -> {}));
+
+            if (isMySQLDB()) {
+                JdbcTemplate jdbcTemplate2 = JdbcUtils.getNewTemplate();
+                String engine = jdbcTemplate2.withTransaction(template ->
+                        template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
+                                (resultSet, rowNumber) -> resultSet.getString(ENGINE),
+                                preparedStatement -> {
+                                    preparedStatement.setString(1, DBname);
+                                    preparedStatement.setString(2, IDN_CONFIG_RESOURCE);
+                                }
+                        )
+                );
+                if (engine.equals("ndbcluster") || engine.equals("NDB")) {
+                    deleteFiles(resourceId);
+                }
+            }
             jdbcTemplate.executeUpdate(SQLConstants.DELETE_RESOURCE_BY_ID_SQL, preparedStatement -> {
                 int initialParameterIndex = 1;
                 preparedStatement.setString(initialParameterIndex, resourceId);
                 preparedStatement.setInt(++initialParameterIndex, tenantId);
             });
-        } catch (DataAccessException e) {
+        } catch (DataAccessException | TransactionException e) {
             throw handleServerException(ERROR_CODE_DELETE_RESOURCE, resourceId, e);
         }
     }
@@ -768,6 +844,51 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     @Override
     public void deleteResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException {
 
+        try {
+            JdbcTemplate jdbcTemplate1 = JdbcUtils.getNewTemplate();
+            String DBname = jdbcTemplate1.withTransaction(template ->
+                    template.fetchSingleRecord(GET_DATABASE_NAME,
+                            (resultSet, rowNumber) -> resultSet.getString(1),
+                            preparedStatement -> {}));
+            if (isMySQLDB()) {
+                JdbcTemplate jdbcTemplate4 = JdbcUtils.getNewTemplate();
+                String engine = jdbcTemplate4.withTransaction(template ->
+                        template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
+                                (resultSet, rowNumber) -> resultSet.getString(ENGINE),
+                                preparedStatement -> {
+                                    preparedStatement.setString(1, DBname);
+                                    preparedStatement.setString(2, IDN_CONFIG_TYPE);
+                                }
+                        )
+                );
+                if (engine.equals("ndbcluster") || engine.equals("NDB")) {
+                    JdbcTemplate jdbcTemplate2 = JdbcUtils.getNewTemplate();
+                    String resourceTypeId = jdbcTemplate2.withTransaction(template ->
+                            template.fetchSingleRecord(
+                                    SQLConstants.GET_RESOURCE_TYPE_ID_BY_NAME_SQL,
+                                    (resultSet, rowNumber) -> resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID),
+                                    preparedStatement -> {
+                                        int initialParameterIndex = 1;
+                                        preparedStatement.setString(initialParameterIndex, resourceTypeName);
+                                    }
+                            )
+                    );
+                    JdbcTemplate jdbcTemplate3 = JdbcUtils.getNewTemplate();
+                    jdbcTemplate3.executeQuery(GET_RESOURCE_ID_TENANT_ID_BY_TYPE_ID_SQL, ((resultSet, rowNumber) -> {
+                        String ResourceId = resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID);
+                        int TenantId = resultSet.getInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID);
+                        try {
+                            deleteResourceById(TenantId, ResourceId);
+                        } catch (ConfigurationManagementException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }), preparedStatement -> preparedStatement.setString(1, resourceTypeId));
+                }
+            }
+        } catch (TransactionException | DataAccessException e) {
+            throw handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceTypeName, e);
+        }
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         try {
             jdbcTemplate.executeUpdate(selectDeleteResourceTypeQuery(null), (
@@ -1365,7 +1486,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         try {
             if (isPostgreSQLDB()) {
                 return jdbcTemplate.fetchSingleRecord(getFileGetByIdSQL(), (resultSet, rowNumber) ->
-                                resultSet.getBinaryStream(DB_SCHEMA_COLUMN_NAME_VALUE), preparedStatement ->
+                        resultSet.getBinaryStream(DB_SCHEMA_COLUMN_NAME_VALUE), preparedStatement ->
                         setPreparedStatementForFileGetById(resourceType, resourceName, fileId, preparedStatement));
             }
             Blob fileBlob = jdbcTemplate.fetchSingleRecord(getFileGetByIdSQL(),

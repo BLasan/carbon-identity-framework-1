@@ -40,15 +40,13 @@ import org.wso2.carbon.identity.configuration.mgt.core.search.PlaceholderSQL;
 import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveConditionValidator;
 import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.core.util.JdbcUtils;
+import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.LambdaExceptionUtils;
 
+import javax.sql.DataSource;
 import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -520,6 +518,19 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         JdbcTemplate jdbcTemplateGetDB = JdbcUtils.getNewTemplate();
         try {
+            String DBprodname = jdbcTemplate.getDatabaseProductName();
+            log.info("DBprodname: "+DBprodname);
+
+//            String dataSource = jdbcTemplate;
+            ResultSet schemas = IdentityDatabaseUtil.getDataSource().getConnection().getMetaData().getSchemas();
+            ResultSet catalog = IdentityDatabaseUtil.getDataSource().getConnection().getMetaData().getCatalogs();
+            while(schemas.next()){
+                log.info("schemas: "+ schemas);
+            }
+            while(catalog.next()){
+                log.info("catalog: "+ catalog);
+            }
+
             String DBname = jdbcTemplateGetDB.withTransaction(template ->
                     template.fetchSingleRecord(GET_DATABASE_NAME,
                             (resultSet, rowNumber) -> resultSet.getString(1),
@@ -547,7 +558,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 preparedStatement.setInt(++initialParameterIndex, tenantId);
                 preparedStatement.setString(++initialParameterIndex, resourceTypeId);
             });
-        } catch (DataAccessException | TransactionException e) {
+        } catch (DataAccessException | TransactionException | SQLException e) {
             throw handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceName, e);
         }
     }
@@ -850,7 +861,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             String DBname = jdbcTemplateGetDB.withTransaction(template ->
                     template.fetchSingleRecord(GET_DATABASE_NAME,
                             (resultSet, rowNumber) -> resultSet.getString(1),
-                            preparedStatement -> {}));
+                            preparedStatement -> { }));
             if (isMySQLDB()) {
                 JdbcTemplate jdbcTemplateGetEngine = JdbcUtils.getNewTemplate();
                 String engine = jdbcTemplateGetEngine.withTransaction(template ->

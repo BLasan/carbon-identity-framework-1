@@ -41,6 +41,10 @@ public class IdPManagementConstants {
     public static final String SW = "sw";
     public static final String EW = "ew";
     public static final String CO = "co";
+
+    public static final String ENGINE = "ENGINE";
+    public static final String NDB_CLUSTER = "ndbcluster";
+    public static final String NDB = "NDB";
     public static final String IDP = "IDP";
     public static final String IDP_PROVISIONING_CONFIG = "IDP_PROVISIONING_CONFIG";
 

@@ -39,6 +39,8 @@ public class ConfigurationConstants {
     public static final String H2 = "H2";
     public static final String ORACLE = "Oracle";
     public static final String ENGINE = "ENGINE";
+    public static final String NDB_CLUSTER = "ndbcluster";
+    public static final String NDB = "NDB";
     public static final String RESOURCE_SEARCH_BEAN_FIELD_TENANT_ID = "tenantId";
     public static final String RESOURCE_SEARCH_BEAN_FIELD_TENANT_DOMAIN = "tenantDomain";
     public static final String RESOURCE_SEARCH_BEAN_FIELD_RESOURCE_TYPE_ID = "resourceTypeId";

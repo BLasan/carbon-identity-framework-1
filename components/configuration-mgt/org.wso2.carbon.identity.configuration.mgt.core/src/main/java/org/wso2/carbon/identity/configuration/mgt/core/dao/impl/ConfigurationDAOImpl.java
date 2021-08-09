@@ -79,6 +79,8 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
         .DB_SCHEMA_COLUMN_NAME_HAS_FILE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ENGINE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NDB_CLUSTER;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NDB;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.DB_SCHEMA_COLUMN_NAME_ID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
         .DB_SCHEMA_COLUMN_NAME_LAST_MODIFIED;
@@ -516,16 +518,16 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
-        JdbcTemplate jdbcTemplate1 = JdbcUtils.getNewTemplate();
+        JdbcTemplate jdbcTemplateGetDB = JdbcUtils.getNewTemplate();
         try {
-            String DBname = jdbcTemplate1.withTransaction(template ->
+            String DBname = jdbcTemplateGetDB.withTransaction(template ->
                     template.fetchSingleRecord(GET_DATABASE_NAME,
                             (resultSet, rowNumber) -> resultSet.getString(1),
                             preparedStatement -> {}));
 
             if (isMySQLDB()) {
-                JdbcTemplate jdbcTemplate2 = JdbcUtils.getNewTemplate();
-                String engine = jdbcTemplate2.withTransaction(template ->
+                JdbcTemplate jdbcTemplateGetEngine = JdbcUtils.getNewTemplate();
+                String engine = jdbcTemplateGetEngine.withTransaction(template ->
                         template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
                                 (resultSet, rowNumber) -> resultSet.getString(ENGINE),
                                 preparedStatement -> {
@@ -534,7 +536,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                                 }
                         )
                 );
-                if (engine.equals("ndbcluster") || engine.equals("NDB") ) {
+                if (engine.equals(NDB_CLUSTER) || engine.equals(NDB) ) {
                     String resourceId = getResourceId(tenantId, resourceTypeId, resourceName);
                     deleteFiles(resourceId);
                 }
@@ -557,16 +559,16 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     public void deleteResourceById(int tenantId, String resourceId) throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
-        JdbcTemplate jdbcTemplate1 = JdbcUtils.getNewTemplate();
+        JdbcTemplate jdbcTemplateGetDB = JdbcUtils.getNewTemplate();
         try {
-            String DBname = jdbcTemplate1.withTransaction(template ->
+            String DBname = jdbcTemplateGetDB.withTransaction(template ->
                     template.fetchSingleRecord(GET_DATABASE_NAME,
                             (resultSet, rowNumber) -> resultSet.getString(1),
                             preparedStatement -> {}));
 
             if (isMySQLDB()) {
-                JdbcTemplate jdbcTemplate2 = JdbcUtils.getNewTemplate();
-                String engine = jdbcTemplate2.withTransaction(template ->
+                JdbcTemplate jdbcTemplateGetEngine = JdbcUtils.getNewTemplate();
+                String engine = jdbcTemplateGetEngine.withTransaction(template ->
                         template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
                                 (resultSet, rowNumber) -> resultSet.getString(ENGINE),
                                 preparedStatement -> {
@@ -575,7 +577,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                                 }
                         )
                 );
-                if (engine.equals("ndbcluster") || engine.equals("NDB")) {
+                if (engine.equals(NDB_CLUSTER) || engine.equals(NDB)) {
                     deleteFiles(resourceId);
                 }
             }
@@ -844,14 +846,14 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     public void deleteResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException {
 
         try {
-            JdbcTemplate jdbcTemplate1 = JdbcUtils.getNewTemplate();
-            String DBname = jdbcTemplate1.withTransaction(template ->
+            JdbcTemplate jdbcTemplateGetDB = JdbcUtils.getNewTemplate();
+            String DBname = jdbcTemplateGetDB.withTransaction(template ->
                     template.fetchSingleRecord(GET_DATABASE_NAME,
                             (resultSet, rowNumber) -> resultSet.getString(1),
                             preparedStatement -> {}));
             if (isMySQLDB()) {
-                JdbcTemplate jdbcTemplate4 = JdbcUtils.getNewTemplate();
-                String engine = jdbcTemplate4.withTransaction(template ->
+                JdbcTemplate jdbcTemplateGetEngine = JdbcUtils.getNewTemplate();
+                String engine = jdbcTemplateGetEngine.withTransaction(template ->
                         template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
                                 (resultSet, rowNumber) -> resultSet.getString(ENGINE),
                                 preparedStatement -> {
@@ -860,9 +862,9 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                                 }
                         )
                 );
-                if (engine.equals("ndbcluster") || engine.equals("NDB")) {
-                    JdbcTemplate jdbcTemplate2 = JdbcUtils.getNewTemplate();
-                    String resourceTypeId = jdbcTemplate2.withTransaction(template ->
+                if (engine.equals(NDB_CLUSTER) || engine.equals(NDB)) {
+                    JdbcTemplate jdbcTemplateGetResourceTypeId = JdbcUtils.getNewTemplate();
+                    String resourceTypeId = jdbcTemplateGetResourceTypeId.withTransaction(template ->
                             template.fetchSingleRecord(
                                     SQLConstants.GET_RESOURCE_TYPE_ID_BY_NAME_SQL,
                                     (resultSet, rowNumber) -> resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID),
@@ -872,8 +874,8 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                                     }
                             )
                     );
-                    JdbcTemplate jdbcTemplate3 = JdbcUtils.getNewTemplate();
-                    jdbcTemplate3.executeQuery(GET_RESOURCE_ID_TENANT_ID_BY_TYPE_ID_SQL, ((resultSet, rowNumber) -> {
+                    JdbcTemplate jdbcTemplateGetIds = JdbcUtils.getNewTemplate();
+                    jdbcTemplateGetIds.executeQuery(GET_RESOURCE_ID_TENANT_ID_BY_TYPE_ID_SQL, ((resultSet, rowNumber) -> {
                         String ResourceId = resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID);
                         int TenantId = resultSet.getInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID);
                         try {

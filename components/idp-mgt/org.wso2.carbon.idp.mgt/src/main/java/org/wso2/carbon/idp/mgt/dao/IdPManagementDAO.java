@@ -1926,7 +1926,7 @@ public class IdPManagementDAO {
      * @throws IdentityProviderManagementException IdentityProviderManagementException
      */
     public IdentityProvider getIDPbyResourceId(Connection dbConnection, String resourceId, int tenantId,
-                                       String tenantDomain) throws IdentityProviderManagementException {
+                                               String tenantDomain) throws IdentityProviderManagementException {
 
         return getIDP(dbConnection, null, -1, resourceId, tenantId, tenantDomain);
     }
@@ -1941,7 +1941,7 @@ public class IdPManagementDAO {
      * @throws IdentityProviderManagementException
      */
     private IdentityProvider getIDP(Connection dbConnection, String idPName, int idpId, String resourceId, int
-                                            tenantId, String tenantDomain) throws IdentityProviderManagementException {
+            tenantId, String tenantDomain) throws IdentityProviderManagementException {
 
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -3737,37 +3737,59 @@ public class IdPManagementDAO {
      */
     private void deleteProvisioningConnectorConfigs(Connection conn, int idPId) throws SQLException {
 
-        ////////////////////////////////////
-        PreparedStatement prepStmt2 = null;
-        ResultSet rs1 = null;
-        String sqlStmt2 = IdPManagementConstants.SQLQueries.GET_IDP_PROVISIONING_CONFIGS_ID;
-        try {
-            prepStmt2 = conn.prepareStatement(sqlStmt2);
-            prepStmt2.setInt(1, idPId);
-            rs1 = prepStmt2.executeQuery();
-            while (rs1.next()) {
-                int id = rs1.getInt("ID");
-                deleteIdpProvConfigProperty(conn,id);
-            }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        //////////////////////////////////////
         PreparedStatement prepStmt = null;
+        PreparedStatement prepStmt2 = null;
+        PreparedStatement prepStmt3 = null;
+        PreparedStatement prepStmt4 = null;
+
+        String databaseProductName = conn.getMetaData().getDatabaseProductName();
+        if (databaseProductName.contains("MySQL")) {
+            ResultSet rs = null;
+            ResultSet rs1 = null;
+            ResultSet rs2 = null;
+            String databaseName = null;
+            String engineType = null;
+            String sqlStmt2 = IdPManagementConstants.SQLQueries.GET_IDP_PROVISIONING_CONFIGS_ID;
+            String sqlStmt3 = IdPManagementConstants.SQLQueries.GET_ENGINE_TYPE_OF_TABLE;
+            String sqlStmt4 = IdPManagementConstants.SQLQueries.GET_DATABASE_NAME;
+
+            try {
+                prepStmt4 = conn.prepareStatement(sqlStmt4);
+                rs2 = prepStmt4.executeQuery();
+                if (rs2.next()) {
+                    databaseName = rs2.getString(1);
+                }
+                prepStmt3 = conn.prepareStatement(sqlStmt3);
+                prepStmt3.setString(1,databaseName);
+                prepStmt3.setString(2,IdPManagementConstants.IDP_PROVISIONING_CONFIG);
+                rs = prepStmt3.executeQuery();
+                if (rs.next()) {
+                    engineType = rs.getString("ENGINE");
+                }
+                if (engineType.equals("ndbcluster") || engineType.equals("NDB")) {
+                    prepStmt2 = conn.prepareStatement(sqlStmt2);
+                    prepStmt2.setInt(1, idPId);
+                    rs1 = prepStmt2.executeQuery();
+                    while (rs1.next()) {
+                        int id = rs1.getInt("ID");
+                        deleteIdpProvConfigProperty(conn, id);
+                    }
+                }
+            } finally {
+                IdentityDatabaseUtil.closeStatement(prepStmt2);
+                IdentityDatabaseUtil.closeStatement(prepStmt3);
+            }
+        }
         String sqlStmt = IdPManagementConstants.SQLQueries.DELETE_PROVISIONING_CONNECTORS;
 
         try {
             prepStmt = conn.prepareStatement(sqlStmt);
             prepStmt.setInt(1, idPId);
             prepStmt.executeUpdate();
-
         } finally {
             IdentityDatabaseUtil.closeStatement(prepStmt);
         }
     }
-
 
     /**
      * @param conn
@@ -3789,12 +3811,46 @@ public class IdPManagementDAO {
 
     /**
      * @param conn
+     * @param tenantId
+     * @param idPName
      * @param resourceId
      * @throws SQLException
      */
     private void deleteIdP(Connection conn, int tenantId, String idPName, String resourceId) throws SQLException {
 
         PreparedStatement prepStmt = null;
+        PreparedStatement prepStmt2 = null;
+        PreparedStatement prepStmt3 = null;
+        PreparedStatement prepStmt4 = null;
+        PreparedStatement prepStmt5 = null;
+        String engineType = null;
+
+        String databaseProductName = conn.getMetaData().getDatabaseProductName();
+        if (databaseProductName.contains("MySQL")) {
+            String databaseName = null;
+            ResultSet rs = null;
+            ResultSet rs2 = null;
+            String sqlStmt4 = IdPManagementConstants.SQLQueries.GET_ENGINE_TYPE_OF_TABLE;
+            String sqlStmt5 = IdPManagementConstants.SQLQueries.GET_DATABASE_NAME;
+
+            try {
+                prepStmt5 = conn.prepareStatement(sqlStmt5);
+                rs2 = prepStmt5.executeQuery();
+                if (rs2.next()) {
+                    databaseName = rs2.getString(1);
+                }
+                prepStmt4 = conn.prepareStatement(sqlStmt4);
+                prepStmt4.setString(1, databaseName);
+                prepStmt4.setString(2, IdPManagementConstants.IDP);
+                rs = prepStmt4.executeQuery();
+                if (rs.next()) {
+                    engineType = rs.getString("ENGINE");
+                }
+            } finally {
+                IdentityDatabaseUtil.closeStatement(prepStmt4);
+                IdentityDatabaseUtil.closeStatement(prepStmt5);
+            }
+        }
         String sqlStmt = IdPManagementConstants.SQLQueries.DELETE_IDP_BY_RESOURCE_ID_SQL;
         if (StringUtils.isBlank(resourceId)) {
             sqlStmt = IdPManagementConstants.SQLQueries.DELETE_IDP_SQL;
@@ -3803,14 +3859,41 @@ public class IdPManagementDAO {
         try {
             prepStmt = conn.prepareStatement(sqlStmt);
             if (StringUtils.isBlank(resourceId)) {
+                if (engineType.equals("ndbcluster") || engineType.equals("NDB")) {
+                    ResultSet rs1 = null;
+                    String sqlStmt2 = IdPManagementConstants.SQLQueries.GET_IDP_CONFIGS_ID_FROM_TENANTID_NAME;
+                    prepStmt2 = conn.prepareStatement(sqlStmt2);
+                    prepStmt2.setInt(1, tenantId);
+                    prepStmt2.setString(2, idPName);
+
+                    rs1 = prepStmt2.executeQuery();
+                    while (rs1.next()) {
+                        int id = rs1.getInt("ID");
+                        deleteProvisioningConnectorConfigs(conn, id);
+                    }
+                }
                 prepStmt.setInt(1, tenantId);
                 prepStmt.setString(2, idPName);
             } else {
+                if (engineType.equals("ndbcluster") || engineType.equals("NDB")) {
+                    ResultSet rs1 = null;
+                    String sqlStmt3 = IdPManagementConstants.SQLQueries.GET_IDP_CONFIGS_ID_FROM_UUID;
+                    prepStmt3 = conn.prepareStatement(sqlStmt3);
+                    prepStmt3.setString(1, resourceId);
+
+                    rs1 = prepStmt3.executeQuery();
+                    while (rs1.next()) {
+                        int id = rs1.getInt("ID");
+                        deleteProvisioningConnectorConfigs(conn, id);
+                    }
+                }
                 prepStmt.setString(1, resourceId);
             }
             prepStmt.executeUpdate();
         } finally {
             IdentityDatabaseUtil.closeStatement(prepStmt);
+            IdentityDatabaseUtil.closeStatement(prepStmt2);
+            IdentityDatabaseUtil.closeStatement(prepStmt3);
         }
     }
 

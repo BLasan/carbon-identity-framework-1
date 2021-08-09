@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS IDN_OAUTH_CONSUMER_APPS (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_OAUTH2_SCOPE_VALIDATORS (
-   APP_ID          INTEGER      NOT NULL,
-   SCOPE_VALIDATOR VARCHAR(128) NOT NULL,
+    APP_ID          INTEGER      NOT NULL,
+    SCOPE_VALIDATOR VARCHAR(128) NOT NULL,
     PRIMARY KEY (APP_ID, SCOPE_VALIDATOR),
     FOREIGN KEY (APP_ID) REFERENCES IDN_OAUTH_CONSUMER_APPS (ID)
     ON DELETE CASCADE
@@ -110,8 +110,8 @@ CREATE TABLE IF NOT EXISTS IDN_OAUTH2_TOKEN_BINDING (
 
 
 CREATE TABLE IF NOT EXISTS IDN_OAUTH2_ACCESS_TOKEN_AUDIT (
-    IDN_OAUTH2_ACCESS_TOKEN_AUDIT_ID     INTEGER NOT NULL AUTO_INCREMENT,
-    TOKEN_ID                      VARCHAR(255),
+     IDN_OAUTH2_ACCESS_TOKEN_AUDIT_ID     INTEGER NOT NULL AUTO_INCREMENT,
+     TOKEN_ID                      VARCHAR(255),
     ACCESS_TOKEN                  VARCHAR(2048),
     REFRESH_TOKEN                 VARCHAR(2048),
     CONSUMER_KEY_ID               INTEGER,
@@ -191,8 +191,8 @@ CREATE TABLE IF NOT EXISTS IDN_OAUTH2_DEVICE_FLOW (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_OAUTH2_DEVICE_FLOW_SCOPES (
-                                                             ID INTEGER NOT NULL AUTO_INCREMENT,
-                                                             SCOPE_ID VARCHAR(255),
+     ID INTEGER NOT NULL AUTO_INCREMENT,
+     SCOPE_ID VARCHAR(255),
     SCOPE VARCHAR(255),
     PRIMARY KEY (ID),
     FOREIGN KEY (SCOPE_ID) REFERENCES IDN_OAUTH2_DEVICE_FLOW(CODE_ID) ON DELETE CASCADE
@@ -210,8 +210,8 @@ CREATE TABLE IF NOT EXISTS IDN_OAUTH2_ACCESS_TOKEN_SCOPE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_OAUTH2_SCOPE (
-                                                SCOPE_ID     INTEGER      NOT NULL AUTO_INCREMENT,
-                                                NAME         VARCHAR(255) NOT NULL,
+    SCOPE_ID     INTEGER      NOT NULL AUTO_INCREMENT,
+    NAME         VARCHAR(255) NOT NULL,
     DISPLAY_NAME VARCHAR(255) NOT NULL,
     DESCRIPTION  VARCHAR(512),
     TENANT_ID    INTEGER      NOT NULL DEFAULT -1,
@@ -222,9 +222,9 @@ CREATE TABLE IF NOT EXISTS IDN_OAUTH2_SCOPE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_OAUTH2_SCOPE_BINDING (
-                                                        IDN_OAUTH2_SCOPE_BINDING_ID INTEGER NOT NULL AUTO_INCREMENT,
-                                                        SCOPE_ID      INTEGER NOT NULL,
-                                                        SCOPE_BINDING VARCHAR(255) NOT NULL,
+    IDN_OAUTH2_SCOPE_BINDING_ID INTEGER NOT NULL AUTO_INCREMENT,
+    SCOPE_ID      INTEGER NOT NULL,
+    SCOPE_BINDING VARCHAR(255) NOT NULL,
     BINDING_TYPE VARCHAR(255) NOT NULL,
     FOREIGN KEY (SCOPE_ID) REFERENCES IDN_OAUTH2_SCOPE (SCOPE_ID)
     ON DELETE CASCADE,
@@ -244,9 +244,9 @@ CREATE TABLE IF NOT EXISTS IDN_OAUTH2_RESOURCE_SCOPE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_SCIM_GROUP (
-                                              ID         INTEGER AUTO_INCREMENT,
-                                              TENANT_ID  INTEGER       NOT NULL,
-                                              ROLE_NAME  VARCHAR(255)  NOT NULL,
+    ID         INTEGER AUTO_INCREMENT,
+    TENANT_ID  INTEGER       NOT NULL,
+    ROLE_NAME  VARCHAR(255)  NOT NULL,
     ATTR_NAME  VARCHAR(1024) NOT NULL,
     ATTR_VALUE VARCHAR(1024),
     PRIMARY KEY (ID)
@@ -287,8 +287,8 @@ CREATE TABLE IF NOT EXISTS IDN_OPENID_ASSOCIATIONS (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_STS_STORE (
-                                             ID            INTEGER               AUTO_INCREMENT,
-                                             TOKEN_ID      VARCHAR(255) NOT NULL,
+     ID            INTEGER               AUTO_INCREMENT,
+     TOKEN_ID      VARCHAR(255) NOT NULL,
     TOKEN_CONTENT BLOB(1024)   NOT NULL,
     CREATE_DATE   TIMESTAMP    NOT NULL,
     EXPIRE_DATE   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -298,8 +298,8 @@ CREATE TABLE IF NOT EXISTS IDN_STS_STORE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_IDENTITY_USER_DATA (
-                                                      TENANT_ID  INTEGER DEFAULT -1234,
-                                                      USER_NAME  VARCHAR(255) NOT NULL,
+      TENANT_ID  INTEGER DEFAULT -1234,
+      USER_NAME  VARCHAR(255) NOT NULL,
     DATA_KEY   VARCHAR(255) NOT NULL,
     DATA_VALUE VARCHAR(2048),
     PRIMARY KEY (TENANT_ID, USER_NAME, DATA_KEY)
@@ -363,8 +363,8 @@ CREATE TABLE IF NOT EXISTS IDN_AUTH_USER (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_AUTH_USER_SESSION_MAPPING (
-                                                             IDN_AUTH_USER_SESSION_MAPPING_ID INTEGER NOT NULL AUTO_INCREMENT,
-                                                             USER_ID VARCHAR(255) NOT NULL,
+     IDN_AUTH_USER_SESSION_MAPPING_ID INTEGER NOT NULL AUTO_INCREMENT,
+     USER_ID VARCHAR(255) NOT NULL,
     SESSION_ID VARCHAR(255) NOT NULL,
     CONSTRAINT USER_SESSION_STORE_CONSTRAINT UNIQUE (USER_ID, SESSION_ID),
     PRIMARY KEY (IDN_AUTH_USER_SESSION_MAPPING_ID)
@@ -389,9 +389,9 @@ CREATE TABLE IF NOT EXISTS IDN_AUTH_SESSION_META_DATA (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS SP_APP (
-                                      ID                            INTEGER      NOT NULL AUTO_INCREMENT,
-                                      TENANT_ID                     INTEGER      NOT NULL,
-                                      APP_NAME                      VARCHAR(255) NOT NULL,
+      ID                            INTEGER      NOT NULL AUTO_INCREMENT,
+      TENANT_ID                     INTEGER      NOT NULL,
+      APP_NAME                      VARCHAR(255) NOT NULL,
     USER_STORE                    VARCHAR(255) NOT NULL,
     USERNAME                      VARCHAR(255) NOT NULL,
     DESCRIPTION                   VARCHAR(1024),
@@ -423,9 +423,9 @@ ALTER TABLE SP_APP
     ADD CONSTRAINT APPLICATION_UUID_CONSTRAINT UNIQUE (UUID);
 
 CREATE TABLE IF NOT EXISTS SP_METADATA (
-                                           ID           INTEGER AUTO_INCREMENT,
-                                           SP_ID        INTEGER,
-                                           NAME         VARCHAR(255) NOT NULL,
+   ID           INTEGER AUTO_INCREMENT,
+   SP_ID        INTEGER,
+   NAME         VARCHAR(255) NOT NULL,
     VALUE        VARCHAR(255) NOT NULL,
     DISPLAY_NAME VARCHAR(255),
     TENANT_ID    INTEGER DEFAULT -1,
@@ -437,9 +437,9 @@ CREATE TABLE IF NOT EXISTS SP_METADATA (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS SP_INBOUND_AUTH (
-                                               ID                  INTEGER      NOT NULL AUTO_INCREMENT,
-                                               TENANT_ID           INTEGER      NOT NULL,
-                                               INBOUND_AUTH_KEY    VARCHAR(255),
+   ID                  INTEGER      NOT NULL AUTO_INCREMENT,
+   TENANT_ID           INTEGER      NOT NULL,
+   INBOUND_AUTH_KEY    VARCHAR(255),
     INBOUND_AUTH_TYPE   VARCHAR(255) NOT NULL,
     INBOUND_CONFIG_TYPE VARCHAR(255) NOT NULL,
     PROP_NAME           VARCHAR(255),
@@ -454,11 +454,11 @@ ALTER TABLE SP_INBOUND_AUTH
         ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS SP_AUTH_STEP (
-                                            ID                INTEGER NOT NULL AUTO_INCREMENT,
-                                            TENANT_ID         INTEGER NOT NULL,
-                                            STEP_ORDER        INTEGER          DEFAULT 1,
-                                            APP_ID            INTEGER NOT NULL,
-                                            IS_SUBJECT_STEP   CHAR(1)          DEFAULT '0',
+    ID                INTEGER NOT NULL AUTO_INCREMENT,
+    TENANT_ID         INTEGER NOT NULL,
+    STEP_ORDER        INTEGER          DEFAULT 1,
+    APP_ID            INTEGER NOT NULL,
+    IS_SUBJECT_STEP   CHAR(1)          DEFAULT '0',
     IS_ATTRIBUTE_STEP CHAR(1)          DEFAULT '0',
     PRIMARY KEY (ID)
     )
@@ -469,10 +469,10 @@ ALTER TABLE SP_AUTH_STEP
         ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS SP_FEDERATED_IDP (
-                                                ID               INTEGER NOT NULL,
-                                                TENANT_ID        INTEGER NOT NULL,
-                                                AUTHENTICATOR_ID INTEGER NOT NULL,
-                                                PRIMARY KEY (ID, AUTHENTICATOR_ID)
+    ID               INTEGER NOT NULL,
+    TENANT_ID        INTEGER NOT NULL,
+    AUTHENTICATOR_ID INTEGER NOT NULL,
+    PRIMARY KEY (ID, AUTHENTICATOR_ID)
     )
     ENGINE NDB;
 
@@ -481,9 +481,9 @@ ALTER TABLE SP_FEDERATED_IDP
         ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS SP_CLAIM_DIALECT (
-                                                ID         INTEGER      NOT NULL AUTO_INCREMENT,
-                                                TENANT_ID  INTEGER      NOT NULL,
-                                                SP_DIALECT VARCHAR(512) NOT NULL,
+    ID         INTEGER      NOT NULL AUTO_INCREMENT,
+    TENANT_ID  INTEGER      NOT NULL,
+    SP_DIALECT VARCHAR(512) NOT NULL,
     APP_ID     INTEGER      NOT NULL,
     PRIMARY KEY (ID)
     )
@@ -494,9 +494,9 @@ ALTER TABLE SP_CLAIM_DIALECT
         ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS SP_CLAIM_MAPPING (
-                                                ID            INTEGER      NOT NULL AUTO_INCREMENT,
-                                                TENANT_ID     INTEGER      NOT NULL,
-                                                IDP_CLAIM     VARCHAR(512) NOT NULL,
+    ID            INTEGER      NOT NULL AUTO_INCREMENT,
+    TENANT_ID     INTEGER      NOT NULL,
+    IDP_CLAIM     VARCHAR(512) NOT NULL,
     SP_CLAIM      VARCHAR(512) NOT NULL,
     APP_ID        INTEGER      NOT NULL,
     IS_REQUESTED  VARCHAR(128)          DEFAULT '0',
@@ -511,9 +511,9 @@ ALTER TABLE SP_CLAIM_MAPPING
         ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS SP_ROLE_MAPPING (
-                                               ID        INTEGER      NOT NULL AUTO_INCREMENT,
-                                               TENANT_ID INTEGER      NOT NULL,
-                                               IDP_ROLE  VARCHAR(255) NOT NULL,
+   ID        INTEGER      NOT NULL AUTO_INCREMENT,
+   TENANT_ID INTEGER      NOT NULL,
+   IDP_ROLE  VARCHAR(255) NOT NULL,
     SP_ROLE   VARCHAR(255) NOT NULL,
     APP_ID    INTEGER      NOT NULL,
     PRIMARY KEY (ID)
@@ -525,9 +525,9 @@ ALTER TABLE SP_ROLE_MAPPING
         ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS SP_REQ_PATH_AUTHENTICATOR (
-                                                         ID                 INTEGER      NOT NULL AUTO_INCREMENT,
-                                                         TENANT_ID          INTEGER      NOT NULL,
-                                                         AUTHENTICATOR_NAME VARCHAR(255) NOT NULL,
+     ID                 INTEGER      NOT NULL AUTO_INCREMENT,
+     TENANT_ID          INTEGER      NOT NULL,
+     AUTHENTICATOR_NAME VARCHAR(255) NOT NULL,
     APP_ID             INTEGER      NOT NULL,
     PRIMARY KEY (ID)
     )
@@ -538,9 +538,9 @@ ALTER TABLE SP_REQ_PATH_AUTHENTICATOR
         ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS SP_PROVISIONING_CONNECTOR (
-                                                         ID             INTEGER      NOT NULL AUTO_INCREMENT,
-                                                         TENANT_ID      INTEGER      NOT NULL,
-                                                         IDP_NAME       VARCHAR(255) NOT NULL,
+     ID             INTEGER      NOT NULL AUTO_INCREMENT,
+     TENANT_ID      INTEGER      NOT NULL,
+     IDP_NAME       VARCHAR(255) NOT NULL,
     CONNECTOR_NAME VARCHAR(255) NOT NULL,
     APP_ID         INTEGER      NOT NULL,
     IS_JIT_ENABLED CHAR(1)      NOT NULL DEFAULT '0',
@@ -555,20 +555,20 @@ ALTER TABLE SP_PROVISIONING_CONNECTOR
         ON DELETE CASCADE;
 
 CREATE TABLE SP_AUTH_SCRIPT (
-                                ID         INTEGER AUTO_INCREMENT NOT NULL,
-                                TENANT_ID  INTEGER                NOT NULL,
-                                APP_ID     INTEGER                NOT NULL,
-                                TYPE       VARCHAR(255)           NOT NULL,
-                                CONTENT    BLOB                            DEFAULT NULL,
-                                IS_ENABLED CHAR(1)                NOT NULL DEFAULT '0',
-                                PRIMARY KEY (ID)
+    ID         INTEGER AUTO_INCREMENT NOT NULL,
+    TENANT_ID  INTEGER                NOT NULL,
+    APP_ID     INTEGER                NOT NULL,
+    TYPE       VARCHAR(255)           NOT NULL,
+    CONTENT    BLOB                            DEFAULT NULL,
+    IS_ENABLED CHAR(1)                NOT NULL DEFAULT '0',
+    PRIMARY KEY (ID)
 )
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS SP_TEMPLATE (
-                                           ID          INTEGER AUTO_INCREMENT NOT NULL,
-                                           TENANT_ID   INTEGER                NOT NULL,
-                                           NAME        VARCHAR(255)           NOT NULL,
+   ID          INTEGER AUTO_INCREMENT NOT NULL,
+   TENANT_ID   INTEGER                NOT NULL,
+   NAME        VARCHAR(255)           NOT NULL,
     DESCRIPTION VARCHAR(1023),
     CONTENT     BLOB DEFAULT NULL,
     PRIMARY KEY (ID),
@@ -577,9 +577,9 @@ CREATE TABLE IF NOT EXISTS SP_TEMPLATE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_AUTH_WAIT_STATUS (
-                                                    ID            INTEGER AUTO_INCREMENT NOT NULL,
-                                                    TENANT_ID     INTEGER                NOT NULL,
-                                                    LONG_WAIT_KEY VARCHAR(255)           NOT NULL,
+    ID            INTEGER AUTO_INCREMENT NOT NULL,
+    TENANT_ID     INTEGER                NOT NULL,
+    LONG_WAIT_KEY VARCHAR(255)           NOT NULL,
     WAIT_STATUS   CHAR(1)                NOT NULL DEFAULT '1',
     TIME_CREATED  TIMESTAMP              NOT NULL DEFAULT CURRENT_TIMESTAMP,
     EXPIRE_TIME   TIMESTAMP              NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -589,9 +589,9 @@ CREATE TABLE IF NOT EXISTS IDN_AUTH_WAIT_STATUS (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP (
-                                   ID                         INTEGER               AUTO_INCREMENT,
-                                   TENANT_ID                  INTEGER,
-                                   NAME                       VARCHAR(254) NOT NULL,
+   ID                         INTEGER               AUTO_INCREMENT,
+   TENANT_ID                  INTEGER,
+   NAME                       VARCHAR(254) NOT NULL,
     IS_ENABLED                 CHAR(1)      NOT NULL DEFAULT '1',
     IS_PRIMARY                 CHAR(1)      NOT NULL DEFAULT '0',
     HOME_REALM_ID              VARCHAR(254),
@@ -618,10 +618,10 @@ CREATE TABLE IF NOT EXISTS IDP (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_ROLE (
-                                        ID        INTEGER AUTO_INCREMENT,
-                                        IDP_ID    INTEGER,
-                                        TENANT_ID INTEGER,
-                                        ROLE      VARCHAR(254),
+    ID        INTEGER AUTO_INCREMENT,
+    IDP_ID    INTEGER,
+    TENANT_ID INTEGER,
+    ROLE      VARCHAR(254),
     PRIMARY KEY (ID),
     UNIQUE (IDP_ID, ROLE),
     FOREIGN KEY (IDP_ID) REFERENCES IDP (ID)
@@ -630,10 +630,10 @@ CREATE TABLE IF NOT EXISTS IDP_ROLE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_ROLE_MAPPING (
-                                                ID            INTEGER AUTO_INCREMENT,
-                                                IDP_ROLE_ID   INTEGER,
-                                                TENANT_ID     INTEGER,
-                                                USER_STORE_ID VARCHAR(253),
+    ID            INTEGER AUTO_INCREMENT,
+    IDP_ROLE_ID   INTEGER,
+    TENANT_ID     INTEGER,
+    USER_STORE_ID VARCHAR(253),
     LOCAL_ROLE    VARCHAR(253),
     PRIMARY KEY (ID),
     UNIQUE (IDP_ROLE_ID, TENANT_ID, USER_STORE_ID, LOCAL_ROLE),
@@ -643,10 +643,10 @@ CREATE TABLE IF NOT EXISTS IDP_ROLE_MAPPING (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_CLAIM (
-                                         ID        INTEGER AUTO_INCREMENT,
-                                         IDP_ID    INTEGER,
-                                         TENANT_ID INTEGER,
-                                         CLAIM     VARCHAR(254),
+     ID        INTEGER AUTO_INCREMENT,
+     IDP_ID    INTEGER,
+     TENANT_ID INTEGER,
+     CLAIM     VARCHAR(254),
     PRIMARY KEY (ID),
     UNIQUE (IDP_ID, CLAIM),
     FOREIGN KEY (IDP_ID) REFERENCES IDP (ID)
@@ -655,10 +655,10 @@ CREATE TABLE IF NOT EXISTS IDP_CLAIM (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_CLAIM_MAPPING (
-                                                 ID            INTEGER      AUTO_INCREMENT,
-                                                 IDP_CLAIM_ID  INTEGER,
-                                                 TENANT_ID     INTEGER,
-                                                 LOCAL_CLAIM   VARCHAR(253),
+     ID            INTEGER      AUTO_INCREMENT,
+     IDP_CLAIM_ID  INTEGER,
+     TENANT_ID     INTEGER,
+     LOCAL_CLAIM   VARCHAR(253),
     DEFAULT_VALUE VARCHAR(255),
     IS_REQUESTED  VARCHAR(128) DEFAULT '0',
     PRIMARY KEY (ID),
@@ -669,10 +669,10 @@ CREATE TABLE IF NOT EXISTS IDP_CLAIM_MAPPING (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_AUTHENTICATOR (
-                                                 ID           INTEGER AUTO_INCREMENT,
-                                                 TENANT_ID    INTEGER,
-                                                 IDP_ID       INTEGER,
-                                                 NAME         VARCHAR(255) NOT NULL,
+     ID           INTEGER AUTO_INCREMENT,
+     TENANT_ID    INTEGER,
+     IDP_ID       INTEGER,
+     NAME         VARCHAR(255) NOT NULL,
     IS_ENABLED   CHAR(1) DEFAULT '1',
     DISPLAY_NAME VARCHAR(255),
     PRIMARY KEY (ID),
@@ -683,9 +683,9 @@ CREATE TABLE IF NOT EXISTS IDP_AUTHENTICATOR (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_METADATA (
-                                            ID           INTEGER AUTO_INCREMENT,
-                                            IDP_ID       INTEGER,
-                                            NAME         VARCHAR(255) NOT NULL,
+    ID           INTEGER AUTO_INCREMENT,
+    IDP_ID       INTEGER,
+    NAME         VARCHAR(255) NOT NULL,
     VALUE        VARCHAR(255) NOT NULL,
     DISPLAY_NAME VARCHAR(255),
     TENANT_ID    INTEGER DEFAULT -1,
@@ -697,10 +697,10 @@ CREATE TABLE IF NOT EXISTS IDP_METADATA (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_AUTHENTICATOR_PROPERTY (
-                                                          ID               INTEGER AUTO_INCREMENT,
-                                                          TENANT_ID        INTEGER,
-                                                          AUTHENTICATOR_ID INTEGER,
-                                                          PROPERTY_KEY     VARCHAR(255) NOT NULL,
+      ID               INTEGER AUTO_INCREMENT,
+      TENANT_ID        INTEGER,
+      AUTHENTICATOR_ID INTEGER,
+      PROPERTY_KEY     VARCHAR(255) NOT NULL,
     PROPERTY_VALUE   VARCHAR(2047),
     IS_SECRET        CHAR(1) DEFAULT '0',
     PRIMARY KEY (ID),
@@ -711,10 +711,10 @@ CREATE TABLE IF NOT EXISTS IDP_AUTHENTICATOR_PROPERTY (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_PROVISIONING_CONFIG (
-                                                       ID                          INTEGER AUTO_INCREMENT,
-                                                       TENANT_ID                   INTEGER,
-                                                       IDP_ID                      INTEGER,
-                                                       PROVISIONING_CONNECTOR_TYPE VARCHAR(255) NOT NULL,
+   ID                          INTEGER AUTO_INCREMENT,
+   TENANT_ID                   INTEGER,
+   IDP_ID                      INTEGER,
+   PROVISIONING_CONNECTOR_TYPE VARCHAR(255) NOT NULL,
     IS_ENABLED                  CHAR(1) DEFAULT '0',
     IS_BLOCKING                 CHAR(1) DEFAULT '0',
     IS_RULES_ENABLED            CHAR(1) DEFAULT '0',
@@ -726,10 +726,10 @@ CREATE TABLE IF NOT EXISTS IDP_PROVISIONING_CONFIG (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_PROV_CONFIG_PROPERTY (
-                                                        ID                     INTEGER AUTO_INCREMENT,
-                                                        TENANT_ID              INTEGER,
-                                                        PROVISIONING_CONFIG_ID INTEGER,
-                                                        PROPERTY_KEY           VARCHAR(255) NOT NULL,
+    ID                     INTEGER AUTO_INCREMENT,
+    TENANT_ID              INTEGER,
+    PROVISIONING_CONFIG_ID INTEGER,
+    PROPERTY_KEY           VARCHAR(255) NOT NULL,
     PROPERTY_VALUE         VARCHAR(2048),
     PROPERTY_BLOB_VALUE    BLOB,
     PROPERTY_TYPE          CHAR(32)     NOT NULL,
@@ -741,9 +741,9 @@ CREATE TABLE IF NOT EXISTS IDP_PROV_CONFIG_PROPERTY (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_PROVISIONING_ENTITY (
-                                                       ID                     INTEGER AUTO_INCREMENT,
-                                                       PROVISIONING_CONFIG_ID INTEGER,
-                                                       ENTITY_TYPE            VARCHAR(255) NOT NULL,
+   ID                     INTEGER AUTO_INCREMENT,
+   PROVISIONING_CONFIG_ID INTEGER,
+   ENTITY_TYPE            VARCHAR(255) NOT NULL,
     ENTITY_LOCAL_USERSTORE VARCHAR(255) NOT NULL,
     ENTITY_NAME            VARCHAR(255) NOT NULL,
     ENTITY_VALUE           VARCHAR(255),
@@ -758,10 +758,10 @@ CREATE TABLE IF NOT EXISTS IDP_PROVISIONING_ENTITY (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDP_LOCAL_CLAIM (
-                                               ID            INTEGER      AUTO_INCREMENT,
-                                               TENANT_ID     INTEGER,
-                                               IDP_ID        INTEGER,
-                                               CLAIM_URI     VARCHAR(255) NOT NULL,
+   ID            INTEGER      AUTO_INCREMENT,
+   TENANT_ID     INTEGER,
+   IDP_ID        INTEGER,
+   CLAIM_URI     VARCHAR(255) NOT NULL,
     DEFAULT_VALUE VARCHAR(255),
     IS_REQUESTED  VARCHAR(128) DEFAULT '0',
     PRIMARY KEY (ID),
@@ -772,8 +772,8 @@ CREATE TABLE IF NOT EXISTS IDP_LOCAL_CLAIM (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_ASSOCIATED_ID (
-                                                 ID          INTEGER AUTO_INCREMENT,
-                                                 IDP_USER_ID VARCHAR(255) NOT NULL,
+     ID          INTEGER AUTO_INCREMENT,
+     IDP_USER_ID VARCHAR(255) NOT NULL,
     TENANT_ID   INTEGER DEFAULT -1234,
     IDP_ID      INTEGER      NOT NULL,
     DOMAIN_NAME VARCHAR(255) NOT NULL,
@@ -796,8 +796,8 @@ CREATE TABLE IF NOT EXISTS IDN_USER_ACCOUNT_ASSOCIATION (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS FIDO_DEVICE_STORE (
-                                                 TENANT_ID       INTEGER,
-                                                 DOMAIN_NAME     VARCHAR(255)  NOT NULL,
+     TENANT_ID       INTEGER,
+     DOMAIN_NAME     VARCHAR(255)  NOT NULL,
     USER_NAME       VARCHAR(45)   NOT NULL,
     TIME_REGISTERED TIMESTAMP,
     KEY_HANDLE      VARCHAR(200)  NOT NULL,
@@ -807,8 +807,8 @@ CREATE TABLE IF NOT EXISTS FIDO_DEVICE_STORE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS FIDO2_DEVICE_STORE (
-                                                  TENANT_ID INTEGER,
-                                                  DOMAIN_NAME VARCHAR(255) NOT NULL,
+      TENANT_ID INTEGER,
+      DOMAIN_NAME VARCHAR(255) NOT NULL,
     USER_NAME VARCHAR(45) NOT NULL,
     TIME_REGISTERED TIMESTAMP,
     USER_HANDLE VARCHAR(64) NOT NULL,
@@ -861,8 +861,8 @@ CREATE TABLE IF NOT EXISTS WF_WORKFLOW (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS WF_WORKFLOW_ASSOCIATION (
-                                                       ID              INTEGER NOT NULL AUTO_INCREMENT,
-                                                       ASSOC_NAME      VARCHAR(45),
+   ID              INTEGER NOT NULL AUTO_INCREMENT,
+   ASSOC_NAME      VARCHAR(45),
     EVENT_ID        VARCHAR(45),
     ASSOC_CONDITION VARCHAR(2000),
     WORKFLOW_ID     VARCHAR(45),
@@ -928,8 +928,8 @@ CREATE TABLE IF NOT EXISTS IDN_RECOVERY_DATA (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_PASSWORD_HISTORY_DATA (
-                                                         ID           INTEGER      NOT NULL AUTO_INCREMENT,
-                                                         USER_NAME    VARCHAR(255) NOT NULL,
+     ID           INTEGER      NOT NULL AUTO_INCREMENT,
+     USER_NAME    VARCHAR(255) NOT NULL,
     USER_DOMAIN  VARCHAR(127) NOT NULL,
     TENANT_ID    INTEGER               DEFAULT -1,
     SALT_VALUE   VARCHAR(255),
@@ -941,8 +941,8 @@ CREATE TABLE IF NOT EXISTS IDN_PASSWORD_HISTORY_DATA (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_CLAIM_DIALECT (
-                                                 ID          INTEGER      NOT NULL AUTO_INCREMENT,
-                                                 DIALECT_URI VARCHAR(255) NOT NULL,
+     ID          INTEGER      NOT NULL AUTO_INCREMENT,
+     DIALECT_URI VARCHAR(255) NOT NULL,
     TENANT_ID   INTEGER      NOT NULL,
     PRIMARY KEY (ID),
     CONSTRAINT DIALECT_URI_CONSTRAINT UNIQUE (DIALECT_URI, TENANT_ID)
@@ -950,9 +950,9 @@ CREATE TABLE IF NOT EXISTS IDN_CLAIM_DIALECT (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_CLAIM (
-                                         ID         INTEGER      NOT NULL AUTO_INCREMENT,
-                                         DIALECT_ID INTEGER      NOT NULL,
-                                         CLAIM_URI  VARCHAR(255) NOT NULL,
+     ID         INTEGER      NOT NULL AUTO_INCREMENT,
+     DIALECT_ID INTEGER      NOT NULL,
+     CLAIM_URI  VARCHAR(255) NOT NULL,
     TENANT_ID  INTEGER      NOT NULL,
     PRIMARY KEY (ID),
     FOREIGN KEY (DIALECT_ID) REFERENCES IDN_CLAIM_DIALECT (ID)
@@ -988,11 +988,11 @@ CREATE TABLE IF NOT EXISTS IDN_CLAIM_PROPERTY (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_CLAIM_MAPPING (
-     ID                    INTEGER NOT NULL AUTO_INCREMENT,
-     EXT_CLAIM_ID          INTEGER NOT NULL,
-     MAPPED_LOCAL_CLAIM_ID INTEGER NOT NULL,
-     TENANT_ID             INTEGER NOT NULL,
-     PRIMARY KEY (ID),
+    ID                    INTEGER NOT NULL AUTO_INCREMENT,
+    EXT_CLAIM_ID          INTEGER NOT NULL,
+    MAPPED_LOCAL_CLAIM_ID INTEGER NOT NULL,
+    TENANT_ID             INTEGER NOT NULL,
+    PRIMARY KEY (ID),
     FOREIGN KEY (EXT_CLAIM_ID) REFERENCES IDN_CLAIM (ID)
     ON DELETE CASCADE,
     FOREIGN KEY (MAPPED_LOCAL_CLAIM_ID) REFERENCES IDN_CLAIM (ID)
@@ -1014,15 +1014,15 @@ CREATE TABLE IF NOT EXISTS IDN_SAML2_ASSERTION_STORE (
     ENGINE NDB;
 
 CREATE TABLE IDN_SAML2_ARTIFACT_STORE (
-  ID              INT(11)      NOT NULL AUTO_INCREMENT,
-  SOURCE_ID       VARCHAR(255) NOT NULL,
-  MESSAGE_HANDLER VARCHAR(255) NOT NULL,
-  AUTHN_REQ_DTO   BLOB         NOT NULL,
-  SESSION_ID      VARCHAR(255) NOT NULL,
-  EXP_TIMESTAMP   TIMESTAMP    NOT NULL,
-  INIT_TIMESTAMP  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  ASSERTION_ID    VARCHAR(255),
-  PRIMARY KEY (`ID`)
+      ID              INT(11)      NOT NULL AUTO_INCREMENT,
+      SOURCE_ID       VARCHAR(255) NOT NULL,
+      MESSAGE_HANDLER VARCHAR(255) NOT NULL,
+      AUTHN_REQ_DTO   BLOB         NOT NULL,
+      SESSION_ID      VARCHAR(255) NOT NULL,
+      EXP_TIMESTAMP   TIMESTAMP    NOT NULL,
+      INIT_TIMESTAMP  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      ASSERTION_ID    VARCHAR(255),
+      PRIMARY KEY (`ID`)
 )
     ENGINE NDB;
 
@@ -1047,9 +1047,9 @@ CREATE TABLE IF NOT EXISTS IDN_OIDC_PROPERTY (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_OIDC_REQ_OBJECT_REFERENCE (
-    ID               INTEGER NOT NULL AUTO_INCREMENT,
-    CONSUMER_KEY_ID  INTEGER,
-    CODE_ID          VARCHAR(255),
+     ID               INTEGER NOT NULL AUTO_INCREMENT,
+     CONSUMER_KEY_ID  INTEGER,
+     CODE_ID          VARCHAR(255),
     TOKEN_ID         VARCHAR(255),
     SESSION_DATA_KEY VARCHAR(255),
     PRIMARY KEY (ID),
@@ -1063,9 +1063,9 @@ CREATE TABLE IF NOT EXISTS IDN_OIDC_REQ_OBJECT_REFERENCE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_OIDC_REQ_OBJECT_CLAIMS (
-    ID              INTEGER NOT NULL AUTO_INCREMENT,
-    REQ_OBJECT_ID   INTEGER,
-    CLAIM_ATTRIBUTE VARCHAR(255),
+      ID              INTEGER NOT NULL AUTO_INCREMENT,
+      REQ_OBJECT_ID   INTEGER,
+      CLAIM_ATTRIBUTE VARCHAR(255),
     ESSENTIAL       CHAR(1) NOT NULL DEFAULT '0',
     VALUE           VARCHAR(255),
     IS_USERINFO     CHAR(1) NOT NULL DEFAULT '0',
@@ -1086,8 +1086,8 @@ CREATE TABLE IF NOT EXISTS IDN_OIDC_REQ_OBJ_CLAIM_VALUES (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_CERTIFICATE (
-   ID                 INTEGER NOT NULL AUTO_INCREMENT,
-   NAME               VARCHAR(100),
+                                               ID                 INTEGER NOT NULL AUTO_INCREMENT,
+                                               NAME               VARCHAR(100),
     CERTIFICATE_IN_PEM BLOB,
     TENANT_ID          INTEGER          DEFAULT 0,
     PRIMARY KEY (ID),
@@ -1096,10 +1096,10 @@ CREATE TABLE IF NOT EXISTS IDN_CERTIFICATE (
     ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_OIDC_SCOPE_CLAIM_MAPPING (
-    ID                INTEGER NOT NULL AUTO_INCREMENT,
-    SCOPE_ID          INTEGER NOT NULL,
-    EXTERNAL_CLAIM_ID INTEGER NOT NULL,
-    PRIMARY KEY (ID),
+                                                            ID                INTEGER NOT NULL AUTO_INCREMENT,
+                                                            SCOPE_ID          INTEGER NOT NULL,
+                                                            EXTERNAL_CLAIM_ID INTEGER NOT NULL,
+                                                            PRIMARY KEY (ID),
     FOREIGN KEY (SCOPE_ID) REFERENCES IDN_OAUTH2_SCOPE (SCOPE_ID)
     ON DELETE CASCADE,
     FOREIGN KEY (EXTERNAL_CLAIM_ID) REFERENCES IDN_CLAIM (ID)
@@ -1136,8 +1136,8 @@ CREATE TABLE IF NOT EXISTS IDN_OAUTH2_CIBA_AUTH_CODE (
     )ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_OAUTH2_CIBA_REQUEST_SCOPES (
-    IDN_OAUTH2_CIBA_REQUEST_SCOPES_ID INTEGER NOT NULL AUTO_INCREMENT,
-    AUTH_CODE_KEY CHAR (36),
+                                                              IDN_OAUTH2_CIBA_REQUEST_SCOPES_ID INTEGER NOT NULL AUTO_INCREMENT,
+                                                              AUTH_CODE_KEY CHAR (36),
     SCOPE VARCHAR (255),
     FOREIGN KEY (AUTH_CODE_KEY) REFERENCES IDN_OAUTH2_CIBA_AUTH_CODE(AUTH_CODE_KEY) ON DELETE CASCADE,
     PRIMARY KEY (IDN_OAUTH2_CIBA_REQUEST_SCOPES_ID)
@@ -1162,9 +1162,9 @@ CREATE TABLE IF NOT EXISTS IDN_CONFIG_TYPE (
     )ENGINE NDB;
 
 INSERT INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) VALUES
-    ('9ab0ef95-13e9-4ed5-afaf-d29bed62f7bd', 'IDP_TEMPLATE', 'Template type to uniquely identify IDP templates'),
-    ('3c4ac3d0-5903-4e3d-aaca-38df65b33bfd', 'APPLICATION_TEMPLATE', 'Template type to uniquely identify Application templates'),
-    ('8ec6dbf1-218a-49bf-bc34-0d2db52d151c', 'CORS_CONFIGURATION', 'A resource type to keep the tenant CORS configurations');
+                                                        ('9ab0ef95-13e9-4ed5-afaf-d29bed62f7bd', 'IDP_TEMPLATE', 'Template type to uniquely identify IDP templates'),
+                                                        ('3c4ac3d0-5903-4e3d-aaca-38df65b33bfd', 'APPLICATION_TEMPLATE', 'Template type to uniquely identify Application templates'),
+                                                        ('8ec6dbf1-218a-49bf-bc34-0d2db52d151c', 'CORS_CONFIGURATION', 'A resource type to keep the tenant CORS configurations');
 
 CREATE TABLE IF NOT EXISTS IDN_CONFIG_RESOURCE (
     ID VARCHAR(255) NOT NULL,
@@ -1202,33 +1202,34 @@ CREATE TABLE IF NOT EXISTS IDN_CONFIG_FILE (
 ALTER TABLE IDN_CONFIG_FILE ADD CONSTRAINT RESOURCE_ID_FILE_FOREIGN_CONSTRAINT FOREIGN KEY (RESOURCE_ID) REFERENCES
     IDN_CONFIG_RESOURCE (ID);
 
+
 CREATE TABLE IDN_REMOTE_FETCH_CONFIG (
-     ID VARCHAR(255) NOT NULL,
-     TENANT_ID INT NOT NULL,
-     IS_ENABLED CHAR(1) NOT NULL,
-     REPO_MANAGER_TYPE VARCHAR(255) NOT NULL,
-     ACTION_LISTENER_TYPE VARCHAR(255) NOT NULL,
-     CONFIG_DEPLOYER_TYPE VARCHAR(255) NOT NULL,
-     REMOTE_FETCH_NAME VARCHAR(255),
-     REMOTE_RESOURCE_URI VARCHAR(255) NOT NULL,
-     ATTRIBUTES_JSON MEDIUMTEXT NOT NULL,
-     PRIMARY KEY (ID),
-     CONSTRAINT UC_REMOTE_RESOURCE_TYPE UNIQUE (TENANT_ID, CONFIG_DEPLOYER_TYPE)
+                                         ID VARCHAR(255) NOT NULL,
+                                         TENANT_ID INT NOT NULL,
+                                         IS_ENABLED CHAR(1) NOT NULL,
+                                         REPO_MANAGER_TYPE VARCHAR(255) NOT NULL,
+                                         ACTION_LISTENER_TYPE VARCHAR(255) NOT NULL,
+                                         CONFIG_DEPLOYER_TYPE VARCHAR(255) NOT NULL,
+                                         REMOTE_FETCH_NAME VARCHAR(255),
+                                         REMOTE_RESOURCE_URI VARCHAR(255) NOT NULL,
+                                         ATTRIBUTES_JSON MEDIUMTEXT NOT NULL,
+                                         PRIMARY KEY (ID),
+                                         CONSTRAINT UC_REMOTE_RESOURCE_TYPE UNIQUE (TENANT_ID, CONFIG_DEPLOYER_TYPE)
 )ENGINE NDB;
 
 CREATE TABLE IDN_REMOTE_FETCH_REVISIONS (
-    ID VARCHAR(255) NOT NULL,
-    CONFIG_ID VARCHAR(255) NOT NULL,
-    FILE_PATH VARCHAR(255) NOT NULL,
-    FILE_HASH VARCHAR(255),
-    DEPLOYED_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    LAST_SYNC_TIME TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    DEPLOYMENT_STATUS VARCHAR(255),
-    ITEM_NAME VARCHAR(255),
-    DEPLOY_ERR_LOG MEDIUMTEXT,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (CONFIG_ID) REFERENCES IDN_REMOTE_FETCH_CONFIG(ID),
-    CONSTRAINT UC_REVISIONS UNIQUE (CONFIG_ID, ITEM_NAME)
+                                            ID VARCHAR(255) NOT NULL,
+                                            CONFIG_ID VARCHAR(255) NOT NULL,
+                                            FILE_PATH VARCHAR(255) NOT NULL,
+                                            FILE_HASH VARCHAR(255),
+                                            DEPLOYED_DATE TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                            LAST_SYNC_TIME TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                            DEPLOYMENT_STATUS VARCHAR(255),
+                                            ITEM_NAME VARCHAR(255),
+                                            DEPLOY_ERR_LOG MEDIUMTEXT,
+                                            PRIMARY KEY (ID),
+                                            FOREIGN KEY (CONFIG_ID) REFERENCES IDN_REMOTE_FETCH_CONFIG(ID),
+                                            CONSTRAINT UC_REVISIONS UNIQUE (CONFIG_ID, ITEM_NAME)
 )ENGINE NDB;
 
 CREATE TABLE IF NOT EXISTS IDN_USER_FUNCTIONALITY_MAPPING (

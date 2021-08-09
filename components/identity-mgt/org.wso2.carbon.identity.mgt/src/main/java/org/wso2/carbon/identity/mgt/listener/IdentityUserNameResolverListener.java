@@ -591,6 +591,7 @@ public class IdentityUserNameResolverListener extends AbstractIdentityUserOperat
         return true;
     }
 
+    @Override
     public boolean doPreUpdateUserListOfInternalRoleWithID(String roleName, String[] deletedUserIDs, String[] newUserIDs,
                                                    UserStoreManager userStoreManager) throws UserStoreException {
 

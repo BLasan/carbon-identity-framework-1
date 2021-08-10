@@ -161,6 +161,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConsta
         .GET_RESOURCE_BY_ID_MYSQL_WITHOUT_CREATED_TIME;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_RESOURCE_BY_NAME_MYSQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_RESOURCE_ID_TENANT_ID_BY_TYPE_ID_SQL;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_RESOURCE_TYPE_ID_BY_NAME_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants
         .GET_RESOURCE_BY_NAME_MSSQL_OR_ORACLE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants
@@ -805,8 +806,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             if (isMySQLDB()) {
                 JdbcTemplate jdbcTemplateGetResourceTypeId = JdbcUtils.getNewTemplate();
                 String resourceTypeId = jdbcTemplateGetResourceTypeId.withTransaction(template ->
-                        template.fetchSingleRecord(
-                                SQLConstants.GET_RESOURCE_TYPE_ID_BY_NAME_SQL,
+                        template.fetchSingleRecord(GET_RESOURCE_TYPE_ID_BY_NAME_SQL,
                                 (resultSet, rowNumber) -> resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID),
                                 preparedStatement -> {
                                     int initialParameterIndex = 1;

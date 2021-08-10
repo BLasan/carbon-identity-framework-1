@@ -70,6 +70,7 @@ public class ConfigurationConstants {
     public static final String TENANT_NAME_FROM_CONTEXT = "TenantNameFromContext";
     public static final String PATH_SEPARATOR = "/";
 
+
     public enum ErrorMessages {
         ERROR_CODE_NO_USER_FOUND("CONFIGM_00001", "No authenticated user found to perform the operation: %s."),
         ERROR_CODE_UNEXPECTED("CONFIGM_00002", "Unexpected Error"),

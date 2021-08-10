@@ -42,12 +42,6 @@ public class IdPManagementConstants {
     public static final String EW = "ew";
     public static final String CO = "co";
 
-    public static final String ENGINE = "ENGINE";
-    public static final String NDB_CLUSTER = "ndbcluster";
-    public static final String NDB = "NDB";
-    public static final String IDP = "IDP";
-    public static final String IDP_PROVISIONING_CONFIG = "IDP_PROVISIONING_CONFIG";
-
     // Idp basic attributes.
     public static final String NAME = "NAME";
     public static final String IDP_NAME = "name";
@@ -182,11 +176,6 @@ public class IdPManagementConstants {
                 + "PROVISIONING_CONFIG_ID, PROPERTY_KEY, PROPERTY_VALUE, PROPERTY_BLOB_VALUE, PROPERTY_TYPE, " +
                 "IS_SECRET FROM IDP_PROV_CONFIG_PROPERTY WHERE TENANT_ID=? AND PROVISIONING_CONFIG_ID=?";
 
-        public static final String GET_DATABASE_NAME = "SELECT DATABASE()";
-
-        public static final String GET_ENGINE_TYPE_OF_TABLE = "SELECT ENGINE FROM information_schema.TABLES " +
-                "WHERE TABLE_SCHEMA=? AND TABLE_NAME=?";
-
         public static final String GET_IDP_PROVISIONING_CONFIGS_ID = "SELECT ID " +
                 "FROM IDP_PROVISIONING_CONFIG WHERE IDP_ID=?";
 
@@ -317,8 +306,8 @@ public class IdPManagementConstants {
         public static final String DELETE_IDP_BY_RESOURCE_ID_SQL = "DELETE FROM IDP WHERE UUID=?";
 
         public static final String GET_IDP_CONFIGS_ID_FROM_UUID = "SELECT ID FROM IDP WHERE UUID=?";
+
         public static final String GET_IDP_CONFIGS_ID_FROM_TENANTID_NAME = "SELECT ID FROM IDP WHERE (TENANT_ID=? AND NAME=?)";
-        public static final String DELETE_IDP_PROVISIONING_CONFIG_SQL = "DELETE FROM IDP_PROVISIONING_CONFIG WHERE IDP_ID=?";
 
         public static final String DELETE_IDP_SP_AUTH_ASSOCIATIONS = "DELETE FROM SP_FEDERATED_IDP WHERE " +
                 "AUTHENTICATOR_ID in (SELECT ID FROM IDP_AUTHENTICATOR WHERE IDP_ID=(SELECT ID FROM IDP WHERE NAME=? " +

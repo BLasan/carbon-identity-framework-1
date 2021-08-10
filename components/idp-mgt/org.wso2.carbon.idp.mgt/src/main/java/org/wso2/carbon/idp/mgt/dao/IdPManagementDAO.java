@@ -78,9 +78,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.idp.mgt.util.IdPManagementConstants.RESET_PROVISIONING_ENTITIES_ON_CONFIG_UPDATE;
-import static org.wso2.carbon.idp.mgt.util.IdPManagementConstants.ENGINE;
-import static org.wso2.carbon.idp.mgt.util.IdPManagementConstants.NDB_CLUSTER;
-import static org.wso2.carbon.idp.mgt.util.IdPManagementConstants.NDB;
 
 /**
  * This class is used to access the data storage to retrieve and store identity provider configurations.
@@ -3742,45 +3739,23 @@ public class IdPManagementDAO {
 
         PreparedStatement prepStmt = null;
         PreparedStatement prepStmtGetConfigId = null;
-        PreparedStatement prepStmtGetEngine = null;
-        PreparedStatement prepStmtGetDB = null;
 
         String databaseProductName = conn.getMetaData().getDatabaseProductName();
         if (databaseProductName.contains("MySQL")) {
-            ResultSet resultSetGetEngine = null;
             ResultSet resultSetGetConfigId = null;
-            ResultSet resultSetGetDB = null;
-            String databaseName = null;
-            String engineType = null;
             String sqlStmtGetConfigId = IdPManagementConstants.SQLQueries.GET_IDP_PROVISIONING_CONFIGS_ID;
-            String sqlStmtGetEngine = IdPManagementConstants.SQLQueries.GET_ENGINE_TYPE_OF_TABLE;
-            String sqlStmtGetDB = IdPManagementConstants.SQLQueries.GET_DATABASE_NAME;
 
             try {
-                prepStmtGetDB = conn.prepareStatement(sqlStmtGetDB);
-                resultSetGetDB = prepStmtGetDB.executeQuery();
-                if (resultSetGetDB.next()) {
-                    databaseName = resultSetGetDB.getString(1);
+                prepStmtGetConfigId = conn.prepareStatement(sqlStmtGetConfigId);
+                prepStmtGetConfigId.setInt(1, idPId);
+                resultSetGetConfigId = prepStmtGetConfigId.executeQuery();
+                while (resultSetGetConfigId.next()) {
+                    int id = resultSetGetConfigId.getInt("ID");
+                    deleteIdpProvConfigProperty(conn, id);
                 }
-                prepStmtGetEngine = conn.prepareStatement(sqlStmtGetEngine);
-                prepStmtGetEngine.setString(1,databaseName);
-                prepStmtGetEngine.setString(2,IdPManagementConstants.IDP_PROVISIONING_CONFIG);
-                resultSetGetEngine = prepStmtGetEngine.executeQuery();
-                if (resultSetGetEngine.next()) {
-                    engineType = resultSetGetEngine.getString(ENGINE);
-                }
-                if (engineType.equals(NDB_CLUSTER) || engineType.equals(NDB)) {
-                    prepStmtGetConfigId = conn.prepareStatement(sqlStmtGetConfigId);
-                    prepStmtGetConfigId.setInt(1, idPId);
-                    resultSetGetConfigId = prepStmtGetConfigId.executeQuery();
-                    while (resultSetGetConfigId.next()) {
-                        int id = resultSetGetConfigId.getInt("ID");
-                        deleteIdpProvConfigProperty(conn, id);
-                    }
-                }
+
             } finally {
                 IdentityDatabaseUtil.closeStatement(prepStmtGetConfigId);
-                IdentityDatabaseUtil.closeStatement(prepStmtGetEngine);
             }
         }
         String sqlStmt = IdPManagementConstants.SQLQueries.DELETE_PROVISIONING_CONNECTORS;
@@ -3800,6 +3775,7 @@ public class IdPManagementDAO {
      * @throws SQLException
      */
     private void deleteIdpProvConfigProperty(Connection conn, int provisioningConfigId) throws SQLException {
+
         PreparedStatement prepStmt = null;
         String sqlStmt = IdPManagementConstants.SQLQueries.DELETE_IDP_PROV_CONFIG_PROPERTY;
 
@@ -3824,36 +3800,8 @@ public class IdPManagementDAO {
         PreparedStatement prepStmt = null;
         PreparedStatement prepStmtGetIdpId = null;
         PreparedStatement prepStmtIdpIdFromUUID = null;
-        PreparedStatement prepStmtGetEngine = null;
-        PreparedStatement prepStmtGetDB = null;
-        String engineType = null;
 
         String databaseProductName = conn.getMetaData().getDatabaseProductName();
-        if (databaseProductName.contains("MySQL")) {
-            String databaseName = null;
-            ResultSet resultSetGetEngine = null;
-            ResultSet resultSetGetDB = null;
-            String sqlStmtGetEngine = IdPManagementConstants.SQLQueries.GET_ENGINE_TYPE_OF_TABLE;
-            String sqlStmtGetDB = IdPManagementConstants.SQLQueries.GET_DATABASE_NAME;
-
-            try {
-                prepStmtGetDB = conn.prepareStatement(sqlStmtGetDB);
-                resultSetGetDB = prepStmtGetDB.executeQuery();
-                if (resultSetGetDB.next()) {
-                    databaseName = resultSetGetDB.getString(1);
-                }
-                prepStmtGetEngine = conn.prepareStatement(sqlStmtGetEngine);
-                prepStmtGetEngine.setString(1, databaseName);
-                prepStmtGetEngine.setString(2, IdPManagementConstants.IDP);
-                resultSetGetEngine = prepStmtGetEngine.executeQuery();
-                if (resultSetGetEngine.next()) {
-                    engineType = resultSetGetEngine.getString(ENGINE);
-                }
-            } finally {
-                IdentityDatabaseUtil.closeStatement(prepStmtGetEngine);
-                IdentityDatabaseUtil.closeStatement(prepStmtGetDB);
-            }
-        }
         String sqlStmt = IdPManagementConstants.SQLQueries.DELETE_IDP_BY_RESOURCE_ID_SQL;
         if (StringUtils.isBlank(resourceId)) {
             sqlStmt = IdPManagementConstants.SQLQueries.DELETE_IDP_SQL;
@@ -3862,7 +3810,7 @@ public class IdPManagementDAO {
         try {
             prepStmt = conn.prepareStatement(sqlStmt);
             if (StringUtils.isBlank(resourceId)) {
-                if (engineType.equals(NDB_CLUSTER) || engineType.equals(NDB)) {
+                if (databaseProductName.contains("MySQL")) {
                     ResultSet resultSetGetIdpId = null;
                     String sqlStmtGetIdpId = IdPManagementConstants.SQLQueries.GET_IDP_CONFIGS_ID_FROM_TENANTID_NAME;
                     prepStmtGetIdpId = conn.prepareStatement(sqlStmtGetIdpId);
@@ -3878,7 +3826,7 @@ public class IdPManagementDAO {
                 prepStmt.setInt(1, tenantId);
                 prepStmt.setString(2, idPName);
             } else {
-                if (engineType.equals(NDB_CLUSTER) || engineType.equals(NDB)) {
+                if (databaseProductName.contains("MySQL")) {
                     ResultSet resultSetGetIdpId = null;
                     String sqlStmtIdpIdFromUUID = IdPManagementConstants.SQLQueries.GET_IDP_CONFIGS_ID_FROM_UUID;
                     prepStmtIdpIdFromUUID = conn.prepareStatement(sqlStmtIdpIdFromUUID);

@@ -449,11 +449,6 @@ public class SQLConstants {
             "  NAME = ?\n" +
             "  AND TENANT_ID = ?\n" +
             "  AND TYPE_ID = ?";
-
-    public static final String GET_DATABASE_NAME = "SELECT DATABASE()";
-    public static final String GET_ENGINE_TYPE_OF_TABLE = "SELECT ENGINE FROM information_schema.TABLES WHERE "
-            + "TABLE_SCHEMA = ? AND TABLE_NAME = ?" ;
-
     public static final String DELETE_RESOURCE_BY_ID_SQL = "DELETE FROM IDN_CONFIG_RESOURCE WHERE ID = ? AND " +
             "TENANT_ID = ?";
     public static final String UPDATE_LAST_MODIFIED_SQL = "UPDATE IDN_CONFIG_RESOURCE SET LAST_MODIFIED = ? " +

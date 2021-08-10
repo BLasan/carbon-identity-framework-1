@@ -40,13 +40,15 @@ import org.wso2.carbon.identity.configuration.mgt.core.search.PlaceholderSQL;
 import org.wso2.carbon.identity.configuration.mgt.core.search.PrimitiveConditionValidator;
 import org.wso2.carbon.identity.configuration.mgt.core.search.exception.PrimitiveConditionValidationException;
 import org.wso2.carbon.identity.configuration.mgt.core.util.JdbcUtils;
-import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.LambdaExceptionUtils;
 
-import javax.sql.DataSource;
 import java.io.InputStream;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -76,9 +78,6 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
         .DB_SCHEMA_COLUMN_NAME_HAS_ATTRIBUTE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
         .DB_SCHEMA_COLUMN_NAME_HAS_FILE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ENGINE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NDB_CLUSTER;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.NDB;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.DB_SCHEMA_COLUMN_NAME_ID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
         .DB_SCHEMA_COLUMN_NAME_LAST_MODIFIED;
@@ -96,10 +95,6 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
         .DB_SCHEMA_COLUMN_NAME_TENANT_ID;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
         .DB_SCHEMA_COLUMN_NAME_VALUE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
-        .IDN_CONFIG_TYPE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants
-        .IDN_CONFIG_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
         .ERROR_CODE_ADD_RESOURCE;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
@@ -151,8 +146,6 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.Configura
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ErrorMessages
         .ERROR_CODE_CHECK_DB_METADATA;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_ATTRIBUTE_SQL;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_ENGINE_TYPE_OF_TABLE;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_DATABASE_NAME;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_FILES_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_FILE_SQL;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.DELETE_RESOURCE_ATTRIBUTES_SQL;
@@ -493,6 +486,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
      * @return resourceId for the given resource.
      */
     private String getResourceId(int tenantId, String resourceTypeId, String resourceName) throws TransactionException {
+
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
         return jdbcTemplate.withTransaction(template ->
                 template.fetchSingleRecord(
@@ -516,41 +510,10 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
             throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
-        JdbcTemplate jdbcTemplateGetDB = JdbcUtils.getNewTemplate();
         try {
-            String DBprodname = jdbcTemplate.getDatabaseProductName();
-            log.info("DBprodname: "+DBprodname);
-
-//            String dataSource = jdbcTemplate;
-            ResultSet schemas = IdentityDatabaseUtil.getDataSource().getConnection().getMetaData().getSchemas();
-            ResultSet catalog = IdentityDatabaseUtil.getDataSource().getConnection().getMetaData().getCatalogs();
-            while(schemas.next()){
-                log.info("schemas: "+ schemas);
-            }
-            while(catalog.next()){
-                log.info("catalog: "+ catalog);
-            }
-
-            String DBname = jdbcTemplateGetDB.withTransaction(template ->
-                    template.fetchSingleRecord(GET_DATABASE_NAME,
-                            (resultSet, rowNumber) -> resultSet.getString(1),
-                            preparedStatement -> {}));
-
             if (isMySQLDB()) {
-                JdbcTemplate jdbcTemplateGetEngine = JdbcUtils.getNewTemplate();
-                String engine = jdbcTemplateGetEngine.withTransaction(template ->
-                        template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
-                                (resultSet, rowNumber) -> resultSet.getString(ENGINE),
-                                preparedStatement -> {
-                                    preparedStatement.setString(1, DBname);
-                                    preparedStatement.setString(2, IDN_CONFIG_RESOURCE);
-                                }
-                        )
-                );
-                if (engine.equals(NDB_CLUSTER) || engine.equals(NDB) ) {
-                    String resourceId = getResourceId(tenantId, resourceTypeId, resourceName);
-                    deleteFiles(resourceId);
-                }
+                String resourceId = getResourceId(tenantId, resourceTypeId, resourceName);
+                deleteFiles(resourceId);
             }
             jdbcTemplate.executeUpdate(SQLConstants.DELETE_RESOURCE_SQL, preparedStatement -> {
                 int initialParameterIndex = 1;
@@ -558,7 +521,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 preparedStatement.setInt(++initialParameterIndex, tenantId);
                 preparedStatement.setString(++initialParameterIndex, resourceTypeId);
             });
-        } catch (DataAccessException | TransactionException | SQLException e) {
+        } catch (DataAccessException | TransactionException e) {
             throw handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceName, e);
         }
     }
@@ -570,34 +533,16 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     public void deleteResourceById(int tenantId, String resourceId) throws ConfigurationManagementException {
 
         JdbcTemplate jdbcTemplate = JdbcUtils.getNewTemplate();
-        JdbcTemplate jdbcTemplateGetDB = JdbcUtils.getNewTemplate();
         try {
-            String DBname = jdbcTemplateGetDB.withTransaction(template ->
-                    template.fetchSingleRecord(GET_DATABASE_NAME,
-                            (resultSet, rowNumber) -> resultSet.getString(1),
-                            preparedStatement -> {}));
-
             if (isMySQLDB()) {
-                JdbcTemplate jdbcTemplateGetEngine = JdbcUtils.getNewTemplate();
-                String engine = jdbcTemplateGetEngine.withTransaction(template ->
-                        template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
-                                (resultSet, rowNumber) -> resultSet.getString(ENGINE),
-                                preparedStatement -> {
-                                    preparedStatement.setString(1, DBname);
-                                    preparedStatement.setString(2, IDN_CONFIG_RESOURCE);
-                                }
-                        )
-                );
-                if (engine.equals(NDB_CLUSTER) || engine.equals(NDB)) {
-                    deleteFiles(resourceId);
-                }
+                deleteFiles(resourceId);
             }
             jdbcTemplate.executeUpdate(SQLConstants.DELETE_RESOURCE_BY_ID_SQL, preparedStatement -> {
                 int initialParameterIndex = 1;
                 preparedStatement.setString(initialParameterIndex, resourceId);
                 preparedStatement.setInt(++initialParameterIndex, tenantId);
             });
-        } catch (DataAccessException | TransactionException e) {
+        } catch (DataAccessException e) {
             throw handleServerException(ERROR_CODE_DELETE_RESOURCE, resourceId, e);
         }
     }
@@ -857,46 +802,29 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     public void deleteResourceTypeByName(String resourceTypeName) throws ConfigurationManagementException {
 
         try {
-            JdbcTemplate jdbcTemplateGetDB = JdbcUtils.getNewTemplate();
-            String DBname = jdbcTemplateGetDB.withTransaction(template ->
-                    template.fetchSingleRecord(GET_DATABASE_NAME,
-                            (resultSet, rowNumber) -> resultSet.getString(1),
-                            preparedStatement -> { }));
             if (isMySQLDB()) {
-                JdbcTemplate jdbcTemplateGetEngine = JdbcUtils.getNewTemplate();
-                String engine = jdbcTemplateGetEngine.withTransaction(template ->
-                        template.fetchSingleRecord(GET_ENGINE_TYPE_OF_TABLE,
-                                (resultSet, rowNumber) -> resultSet.getString(ENGINE),
+                JdbcTemplate jdbcTemplateGetResourceTypeId = JdbcUtils.getNewTemplate();
+                String resourceTypeId = jdbcTemplateGetResourceTypeId.withTransaction(template ->
+                        template.fetchSingleRecord(
+                                SQLConstants.GET_RESOURCE_TYPE_ID_BY_NAME_SQL,
+                                (resultSet, rowNumber) -> resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID),
                                 preparedStatement -> {
-                                    preparedStatement.setString(1, DBname);
-                                    preparedStatement.setString(2, IDN_CONFIG_TYPE);
+                                    int initialParameterIndex = 1;
+                                    preparedStatement.setString(initialParameterIndex, resourceTypeName);
                                 }
                         )
                 );
-                if (engine.equals(NDB_CLUSTER) || engine.equals(NDB)) {
-                    JdbcTemplate jdbcTemplateGetResourceTypeId = JdbcUtils.getNewTemplate();
-                    String resourceTypeId = jdbcTemplateGetResourceTypeId.withTransaction(template ->
-                            template.fetchSingleRecord(
-                                    SQLConstants.GET_RESOURCE_TYPE_ID_BY_NAME_SQL,
-                                    (resultSet, rowNumber) -> resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID),
-                                    preparedStatement -> {
-                                        int initialParameterIndex = 1;
-                                        preparedStatement.setString(initialParameterIndex, resourceTypeName);
-                                    }
-                            )
-                    );
-                    JdbcTemplate jdbcTemplateGetIds = JdbcUtils.getNewTemplate();
-                    jdbcTemplateGetIds.executeQuery(GET_RESOURCE_ID_TENANT_ID_BY_TYPE_ID_SQL, ((resultSet, rowNumber) -> {
-                        String ResourceId = resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID);
-                        int TenantId = resultSet.getInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID);
-                        try {
-                            deleteResourceById(TenantId, ResourceId);
-                        } catch (ConfigurationManagementException e) {
-                            e.printStackTrace();
-                        }
-                        return null;
-                    }), preparedStatement -> preparedStatement.setString(1, resourceTypeId));
-                }
+                JdbcTemplate jdbcTemplateGetIds = JdbcUtils.getNewTemplate();
+                jdbcTemplateGetIds.executeQuery(GET_RESOURCE_ID_TENANT_ID_BY_TYPE_ID_SQL, ((resultSet, rowNumber) -> {
+                    String ResourceId = resultSet.getString(DB_SCHEMA_COLUMN_NAME_ID);
+                    int TenantId = resultSet.getInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID);
+                    try {
+                        deleteResourceById(TenantId, ResourceId);
+                    } catch (ConfigurationManagementException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }), preparedStatement -> preparedStatement.setString(1, resourceTypeId));
             }
         } catch (TransactionException | DataAccessException e) {
             throw handleServerException(ERROR_CODE_DELETE_RESOURCE_TYPE, resourceTypeName, e);

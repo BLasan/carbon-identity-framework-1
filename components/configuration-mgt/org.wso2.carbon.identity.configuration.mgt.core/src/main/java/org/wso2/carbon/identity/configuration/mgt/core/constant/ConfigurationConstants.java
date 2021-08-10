@@ -38,9 +38,6 @@ public class ConfigurationConstants {
     public static final String INFORMIX = "Informix";
     public static final String H2 = "H2";
     public static final String ORACLE = "Oracle";
-    public static final String ENGINE = "ENGINE";
-    public static final String NDB_CLUSTER = "ndbcluster";
-    public static final String NDB = "NDB";
     public static final String RESOURCE_SEARCH_BEAN_FIELD_TENANT_ID = "tenantId";
     public static final String RESOURCE_SEARCH_BEAN_FIELD_TENANT_DOMAIN = "tenantDomain";
     public static final String RESOURCE_SEARCH_BEAN_FIELD_RESOURCE_TYPE_ID = "resourceTypeId";
@@ -72,9 +69,6 @@ public class ConfigurationConstants {
     public static final String TENANT_CONTEXT_PATH_COMPONENT = "/t/%s";
     public static final String TENANT_NAME_FROM_CONTEXT = "TenantNameFromContext";
     public static final String PATH_SEPARATOR = "/";
-    public static final String IDN_CONFIG_TYPE = "IDN_CONFIG_TYPE";
-    public static final String IDN_CONFIG_RESOURCE = "IDN_CONFIG_RESOURCE";
-
 
     public enum ErrorMessages {
         ERROR_CODE_NO_USER_FOUND("CONFIGM_00001", "No authenticated user found to perform the operation: %s."),

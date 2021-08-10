@@ -18,12 +18,17 @@ package org.wso2.carbon.identity.configuration.mgt.core.util;
 
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
-import org.wso2.carbon.database.utils.jdbc.exceptions.TransactionException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.*;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_DATABASE_NAME;
-import static org.wso2.carbon.identity.configuration.mgt.core.constant.SQLConstants.GET_ENGINE_TYPE_OF_TABLE;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.DB2;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.H2;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.INFORMIX;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.MARIA_DB;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.MICROSOFT;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.MY_SQL;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.POSTGRE_SQL;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.S_MICROSOFT;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.ConfigurationConstants.ORACLE;
 
 /**
  * A util class to support the Jdbc executions.

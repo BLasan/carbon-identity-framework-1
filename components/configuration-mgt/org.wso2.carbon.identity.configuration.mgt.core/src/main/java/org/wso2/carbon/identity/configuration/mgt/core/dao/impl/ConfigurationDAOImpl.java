@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core.dao.impl;
 
+import com.sun.xml.internal.bind.v2.TODO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -481,9 +482,9 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
     /**
      * Get resourceId for the {@link Resource}.
      *
-     * @param tenantId tenant Id of the {@link Resource}.
-     * @param resourceTypeId type Id of the {@link Resource}.
-     * @param resourceName name of the {@link Resource}.
+     * @param tenantId          Tenant Id of the {@link Resource}.
+     * @param resourceTypeId    Type Id of the {@link Resource}.
+     * @param resourceName      Name of the {@link Resource}.
      * @return resourceId for the given resource.
      */
     private String getResourceId(int tenantId, String resourceTypeId, String resourceName) throws TransactionException {
@@ -822,6 +823,7 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                         deleteResourceById(TenantId, ResourceId);
                     } catch (ConfigurationManagementException e) {
                         e.printStackTrace();
+                        log.error(ERROR_CODE_DELETE_RESOURCE + ResourceId, e);
                     }
                     return null;
                 }), preparedStatement -> preparedStatement.setString(1, resourceTypeId));

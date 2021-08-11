@@ -3770,9 +3770,9 @@ public class IdPManagementDAO {
     }
 
     /**
-     * @param conn
-     * @param provisioningConfigId
-     * @throws SQLException
+     * @param conn                   Connection to the DB.
+     * @param provisioningConfigId   Provisioning Configuration Id of the IdP.
+     * @throws SQLException          Database Exception.
      */
     private void deleteIdpProvConfigProperty(Connection conn, int provisioningConfigId) throws SQLException {
 
@@ -3789,11 +3789,11 @@ public class IdPManagementDAO {
     }
 
     /**
-     * @param conn
-     * @param tenantId
-     * @param idPName
-     * @param resourceId
-     * @throws SQLException
+     * @param conn              Connection to the DB.
+     * @param tenantId          Tenant Id of the IdP.
+     * @param idPName           Name of the IdP.
+     * @param resourceId        Resource Id (UUID) of the IdP.
+     * @throws SQLException     Database Exception.
      */
     private void deleteIdP(Connection conn, int tenantId, String idPName, String resourceId) throws SQLException {
 

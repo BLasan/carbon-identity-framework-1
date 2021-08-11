@@ -822,7 +822,6 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                     try {
                         deleteResourceById(TenantId, ResourceId);
                     } catch (ConfigurationManagementException e) {
-                        e.printStackTrace();
                         log.error(ERROR_CODE_DELETE_RESOURCE + ResourceId, e);
                     }
                     return null;

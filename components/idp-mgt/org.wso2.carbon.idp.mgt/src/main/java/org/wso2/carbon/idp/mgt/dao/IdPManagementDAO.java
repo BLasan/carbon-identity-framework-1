@@ -78,6 +78,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.idp.mgt.util.IdPManagementConstants.RESET_PROVISIONING_ENTITIES_ON_CONFIG_UPDATE;
+import static org.wso2.carbon.idp.mgt.util.IdPManagementConstants.MySQL;
 
 /**
  * This class is used to access the data storage to retrieve and store identity provider configurations.
@@ -3741,7 +3742,7 @@ public class IdPManagementDAO {
         PreparedStatement prepStmtGetConfigId = null;
 
         String databaseProductName = conn.getMetaData().getDatabaseProductName();
-        if (databaseProductName.contains("MySQL")) {
+        if (databaseProductName.contains(MySQL)) {
             ResultSet resultSetGetConfigId = null;
             String sqlStmtGetConfigId = IdPManagementConstants.SQLQueries.GET_IDP_PROVISIONING_CONFIGS_ID;
 
@@ -3810,9 +3811,9 @@ public class IdPManagementDAO {
         try {
             prepStmt = conn.prepareStatement(sqlStmt);
             if (StringUtils.isBlank(resourceId)) {
-                if (databaseProductName.contains("MySQL")) {
+                if (databaseProductName.contains(MySQL)) {
                     ResultSet resultSetGetIdpId = null;
-                    String sqlStmtGetIdpId = IdPManagementConstants.SQLQueries.GET_IDP_CONFIGS_ID_FROM_TENANTID_NAME;
+                    String sqlStmtGetIdpId = IdPManagementConstants.SQLQueries.GET_IDP_CONFIGS_ID_FROM_TENANT_ID_AND_NAME;
                     prepStmtGetIdpId = conn.prepareStatement(sqlStmtGetIdpId);
                     prepStmtGetIdpId.setInt(1, tenantId);
                     prepStmtGetIdpId.setString(2, idPName);
@@ -3826,7 +3827,7 @@ public class IdPManagementDAO {
                 prepStmt.setInt(1, tenantId);
                 prepStmt.setString(2, idPName);
             } else {
-                if (databaseProductName.contains("MySQL")) {
+                if (databaseProductName.contains(MySQL)) {
                     ResultSet resultSetGetIdpId = null;
                     String sqlStmtIdpIdFromUUID = IdPManagementConstants.SQLQueries.GET_IDP_CONFIGS_ID_FROM_UUID;
                     prepStmtIdpIdFromUUID = conn.prepareStatement(sqlStmtIdpIdFromUUID);

@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.identity.configuration.mgt.core.dao.impl;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -72,15 +72,15 @@ public class ApplicationMgtListenerServiceComponent {
             service = ApplicationResourceManagementListener.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetApplicationResourceMgtListener"
+            unbind = "removeApplicationResourceMgtListener"
     )
-    protected synchronized void setApplicationResourceMgtListener(ApplicationResourceManagementListener listener) {
+    protected synchronized void addApplicationResourceMgtListener(ApplicationResourceManagementListener listener) {
 
         applicationResourceMgtListeners.add(listener);
         applicationResourceMgtListeners.sort(appResourceMgtListenerComparator);
     }
 
-    protected synchronized void unsetApplicationResourceMgtListener(ApplicationResourceManagementListener listener) {
+    protected synchronized void removeApplicationResourceMgtListener(ApplicationResourceManagementListener listener) {
 
         applicationResourceMgtListeners.remove(listener);
     }

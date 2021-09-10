@@ -29,6 +29,8 @@ import org.wso2.carbon.identity.claim.metadata.mgt.dao.LocalClaimDAO;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataClientException;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataException;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataServerException;
+import org.wso2.carbon.identity.claim.metadata.mgt.internal.IdentityClaimManagementServiceComponent;
+import org.wso2.carbon.identity.claim.metadata.mgt.listener.ClaimMetadataMgtListener;
 import org.wso2.carbon.identity.claim.metadata.mgt.model.ClaimDialect;
 import org.wso2.carbon.identity.claim.metadata.mgt.model.ExternalClaim;
 import org.wso2.carbon.identity.claim.metadata.mgt.model.LocalClaim;
@@ -37,6 +39,7 @@ import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -243,11 +246,21 @@ public class ClaimMetadataManagementServiceImpl implements ClaimMetadataManageme
                     String.format(ERROR_CODE_LOCAL_CLAIM_HAS_MAPPED_EXTERNAL_CLAIM.getMessage(), localClaimURI));
         }
 
-        // Add listener
+        Collection<ClaimMetadataMgtListener> listeners =
+                IdentityClaimManagementServiceComponent.getClaimMetadataMgtListeners();
+        for (ClaimMetadataMgtListener listener : listeners) {
+            if (listener.isEnable() && !listener.doPreDeleteClaim(localClaimURI, tenantDomain)) {
+                return;
+            }
+        }
 
         this.localClaimDAO.removeLocalClaim(localClaimURI, tenantId);
 
-        // Add listener
+        for (ClaimMetadataMgtListener listener : listeners) {
+            if (listener.isEnable() && !listener.doPostDeleteClaim(localClaimURI, tenantDomain)) {
+                return;
+            }
+        }
     }
 
     @Override

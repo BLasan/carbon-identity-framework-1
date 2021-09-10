@@ -187,6 +187,12 @@ public class CacheBackedApplicationDAO extends ApplicationDAOImpl {
         appDAO.updateApplication(serviceProvider, tenantDomain);
     }
 
+    public void clearApplicationFromCache(ServiceProvider serviceProvider, String tenantDomain)
+            throws IdentityApplicationManagementException {
+
+        clearAllAppCache(serviceProvider, tenantDomain);
+    }
+
     public void deleteApplication(String applicationName) throws IdentityApplicationManagementException {
 
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();

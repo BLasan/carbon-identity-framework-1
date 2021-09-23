@@ -350,7 +350,6 @@ public class IdentityProvider implements Serializable {
         if (CollectionUtils.size(idpProperties) > 0) {
             identityProvider.setIdpProperties(idpProperties.toArray(new IdentityProviderProperty[0]));
         }
-
         return identityProvider;
     }
 

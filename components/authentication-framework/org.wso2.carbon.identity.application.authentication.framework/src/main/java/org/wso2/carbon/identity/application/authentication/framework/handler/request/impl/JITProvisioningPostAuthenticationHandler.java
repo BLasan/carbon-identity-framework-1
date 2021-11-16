@@ -318,14 +318,7 @@ public class JITProvisioningPostAuthenticationHandler extends AbstractPostAuthnH
                             getLocalUserAssociatedForFederatedIdentifier(stepConfig.getAuthenticatedIdP(),
                                     stepConfig.getAuthenticatedUser().getAuthenticatedSubjectIdentifier(), context.getTenantDomain());
 
-                    String username;
-                    String userIdClaimUriInLocalDialect = getUserIdClaimUriInLocalDialect(externalIdPConfig);
-                    if (isUserNameFoundFromUserIDClaimURI(localClaimValues, userIdClaimUriInLocalDialect)) {
-                        username = localClaimValues.get(userIdClaimUriInLocalDialect);
-                    } else {
-                        username = associatedLocalUser;
-                    }
-
+                    String username = associatedLocalUser;
                     // If associatedLocalUser is null, that means relevant association not exist already.
                     if (StringUtils.isEmpty(associatedLocalUser) && !isUserCreated) {
                         if (log.isDebugEnabled()) {

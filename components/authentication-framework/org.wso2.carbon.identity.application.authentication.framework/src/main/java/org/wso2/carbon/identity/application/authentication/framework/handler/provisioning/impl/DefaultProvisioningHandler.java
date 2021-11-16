@@ -162,6 +162,7 @@ public class DefaultProvisioningHandler implements ProvisioningHandler {
                 if (!userClaims.isEmpty() && associationExists) {
                     userClaims.remove(FrameworkConstants.PASSWORD);
                     userClaims.remove(USERNAME_CLAIM);
+                    userClaims.remove(FrameworkConstants.USERID_CLAIM);
                     userStoreManager.setUserClaimValues(UserCoreUtil.removeDomainFromName(username), userClaims, null);
                     /*
                     Since the user is exist following code is get all active claims of user and crosschecking against

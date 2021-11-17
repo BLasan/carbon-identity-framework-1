@@ -349,7 +349,7 @@ public class JITProvisioningPostAuthenticationHandler extends AbstractPostAuthnH
                         }
                     }
                     if (StringUtils.isEmpty(username)) {
-                        username = sequenceConfig.getAuthenticatedUser().getUserName();
+                        username = getUsernameFederatedUser(sequenceConfig, localClaimValues, externalIdPConfig);
                         isUserCreated = true;
                     }
                     if (log.isDebugEnabled()) {
@@ -394,6 +394,19 @@ public class JITProvisioningPostAuthenticationHandler extends AbstractPostAuthnH
             log.debug("Built consent from endpoint util : " + consent);
         }
         return receiptInput;
+    }
+
+    private String getUsernameFederatedUser(SequenceConfig sequenceConfig, Map<String, String> localClaimValues,
+                                            ExternalIdPConfig externalIdPConfig) {
+
+        String username;
+        String userIdClaimUriInLocalDialect = getUserIdClaimUriInLocalDialect(externalIdPConfig);
+        if (isUserNameFoundFromUserIDClaimURI(localClaimValues, userIdClaimUriInLocalDialect)) {
+            username = localClaimValues.get(userIdClaimUriInLocalDialect);
+        } else {
+            username = sequenceConfig.getAuthenticatedUser().getUserName();
+        }
+        return username;
     }
 
     /**
